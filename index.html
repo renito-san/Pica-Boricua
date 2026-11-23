@@ -1236,7 +1236,7 @@
     </style>
     <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#1c6b3a" />
-</head>
+  </head>
   <body>
     <main class="wrap">
       <div class="game" id="gameScreen">
@@ -3252,6 +3252,7 @@
         state.stats.races++;
         monthBucket().races++;     // la carrera también suma al mes en curso
         saveCounters();
+        try { if (window.goatcounter && goatcounter.count) goatcounter.count({ path: 'carrera', event: true }); } catch (e) { /* GoatCounter no cargó: el juego sigue */ }
         if (won) {
           state.stats.wins++;
           state.stats.best = Math.max(state.stats.best, credited);
@@ -3655,6 +3656,7 @@
           counters.ads[pos + "-" + num] = (counters.ads[pos + "-" + num] || 0) + 1;
           monthBucket().ads++;     // el toque también suma al mes en curso
           saveCounters();
+          try { if (window.goatcounter && goatcounter.count) goatcounter.count({ path: 'anuncio/' + pos + '-' + num, title: 'Anuncio ' + pos + ' ' + num, event: true }); } catch (e) { /* GoatCounter no cargó: el juego sigue */ }
           renderSponsorLine();
           $("sponsorKicker").textContent = "Espacio " + num + " · " + pos;
           var biz = btn.dataset.biz, tag = btn.dataset.tag;
@@ -3865,6 +3867,7 @@
       renderStats();
       updateJugada();
     </script>
+    <script data-goatcounter="https://picaboricua.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
   <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
@@ -3872,6 +3875,5 @@ if ("serviceWorker" in navigator) {
   });
 }
 </script>
-<!-- GOATCOUNTER -->
-</body>
+  </body>
 </html>
