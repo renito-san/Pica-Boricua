@@ -1,0 +1,23 @@
+{
+  "name": "Pica Boricua",
+  "short_name": "Pica Boricua",
+  "description": "Las picas de Puerto Rico: apuesta sin dinero real, sin pasarte de la línea.",
+  "lang": "es",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#025532",
+  "theme_color": "#1c6b3a",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
