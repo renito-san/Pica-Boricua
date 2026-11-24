@@ -360,6 +360,10 @@
       @media (prefers-color-scheme: dark) { .torneo-err { color: #ff9a9a; } }
       .torneo-err:empty { display: none; }
       .torneo-status { margin: 8px 0 4px; font-size: .84rem; font-weight: 700; color: var(--ink-soft); line-height: 1.4; }
+      /* Nota del candado de nombre: junto al alias cuando ya fijó. */
+      .torneo-note { margin: 4px 0 0; font-size: .78rem; font-weight: 700; color: var(--ink-soft); line-height: 1.35; }
+      .torneo-btn:disabled { opacity: .5; cursor: default; }
+      .torneo-btn:disabled:active { transform: none; }
       .torneo-top { list-style: none; margin: 6px 0 4px; padding: 0; counter-reset: rk; }
       .torneo-top li {
         display: flex; align-items: baseline; gap: 8px;
@@ -1365,7 +1369,6 @@
           </div>
           <div class="icon-btns">
             <button class="icon-btn" id="btnShare" type="button" aria-label="Compartir el juego" title="Compartir el juego"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19v-7"/></svg></button>
-            <button class="icon-btn off" id="btnSound" type="button" aria-pressed="false" aria-label="Sonido: apagado" title="Sonido: apagado">♪</button>
             <button class="icon-btn" id="btnHelp" type="button" aria-label="¿Cómo se juega?" title="¿Cómo se juega?">?</button>
             <button class="icon-btn" id="btnReset" type="button" aria-label="Reiniciar juego" title="Reiniciar juego">↺</button>
           </div>
@@ -1555,7 +1558,7 @@
 
             <div class="torneo-block" id="torneoBlock">
               <p class="torneo-name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.9 5.7 3.9 9S14.5 18.4 12 21c-2.5-2.6-3.9-5.7-3.9-9S9.5 5.6 12 3z"/></svg><span>TORNEO EN LÍNEA</span></p>
-              <p class="sponsor-note">Torneo en línea — todos los jugadores. La misma semana (lunes a domingo) y los mismos puntos de cada carrera, pero contra la tabla real: el #1 de la semana queda coronado en el muro de campeones.</p>
+              <p class="sponsor-note">Torneo en línea — todos los jugadores. La misma semana (lunes a domingo) y los mismos puntos de cada carrera, pero contra la tabla real: el #1 de la semana queda coronado en el muro de campeones. Tu nombre queda fijo al sumar tus primeros puntos de la semana y no puede repetirse entre jugadores.</p>
               <div class="torneo-id" id="torneoId"></div>
               <p class="torneo-status" id="torneoStatus">La tabla se busca al abrir este pliegue.</p>
               <ol class="torneo-top" id="torneoTop"></ol>
@@ -2409,11 +2412,21 @@
          dentro de Muse, lo que sea), el delta queda PENDIENTE en el
          mismo guardado y se reintenta al cargar el juego y tras la
          próxima carrera. El juego jamás se bloquea ni enseña errores
-         por el torneo; la Copa local sigue mandando. */
+         por el torneo; la Copa local sigue mandando.
+         CANDADO DE NOMBRE: el servidor fija el alias por teléfono y
+         semana — submit_points rechaza con «nombre fijo» un envío con
+         otro alias distinto al ya registrado esa semana, y con «alias
+         en uso» un alias que otro teléfono ya tenga esa semana (sin
+         importar mayúsculas). El cliente lleva la marca local
+         lockedWeek (la semana del último envío aceptado): si es la
+         semana en curso, el botón Cambiar se desactiva con su nota;
+         al cambiar la semana la marca queda vieja y el candado se
+         libera solo. taken recuerda el rechazo «alias en uso» para
+         reabrir el editor con el aviso claro, sin errores crudos. */
       var TORNEO_KEY = "picaspr_torneo_v1";
       var SB_URL = "https://phaxlxnhkimcwbfdfyya.supabase.co";
       var SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBoYXhseG5oa2ltY3diZmRmeXlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU0NzkyNTcsImV4cCI6MjExMTA1NTI1N30.NN3MRDNFc1gqup5dvwLwLE7JIEOVrHycFQ61BMHnMqk";
-      var torneo = { alias: "", token: "", pending: {}, closeFor: "" };
+      var torneo = { alias: "", token: "", pending: {}, closeFor: "", lockedWeek: "", taken: false };
       var torneoFlushing = false;
       function torneoSave() {
         try { localStorage.setItem(TORNEO_KEY, JSON.stringify(torneo)); } catch (e) { /* navegador privado */ }
@@ -2426,6 +2439,8 @@
             torneo.token = typeof t.token === "string" ? t.token : "";
             torneo.pending = (t.pending && typeof t.pending === "object") ? t.pending : {};
             torneo.closeFor = typeof t.closeFor === "string" ? t.closeFor : "";
+            torneo.lockedWeek = typeof t.lockedWeek === "string" ? t.lockedWeek : "";
+            torneo.taken = t.taken === true;
           }
         } catch (e) { /* sin guardado: se entra al torneo cuando el jugador quiera */ }
       }
@@ -2459,14 +2474,31 @@
       function sbHeaders() {
         return { "apikey": SB_ANON, "Authorization": "Bearer " + SB_ANON, "Content-Type": "application/json" };
       }
+      /* Candado local: hay nombre fijado si el último envío aceptado
+         fue en la semana en curso. Al cambiar la semana, lockedWeek
+         queda en el pasado y el candado se libera solo. */
+      function torneoLocked() {
+        return !!torneo.alias && !!torneo.lockedWeek && torneo.lockedWeek === weekKeyOf(new Date());
+      }
       /* Envío de UN delta ya troceado (1–56) por la RPC del servidor.
-         Devuelve true solo si el servidor aceptó; cualquier fallo
-         (red, HTTP, JSON) devuelve false y el delta se queda pendiente. */
+         Devuelve "ok" solo si el servidor aceptó; "alias" si rechazó
+         con «alias en uso» y "fixed" si rechazó con «nombre fijo»
+         (se leen del cuerpo del error, sin enseñar nada crudo);
+         cualquier otro fallo (red, HTTP, JSON) devuelve "fail" y el
+         delta se queda pendiente. */
       function torneoSendChunk(week, delta) {
         return fetch(SB_URL + "/rest/v1/rpc/submit_points", {
           method: "POST", headers: sbHeaders(),
           body: JSON.stringify({ p_alias: torneo.alias, p_token: torneo.token, p_week: week, p_delta: delta })
-        }).then(function (r) { return !!r.ok; }).catch(function () { return false; });
+        }).then(function (r) {
+          if (r.ok) return "ok";
+          return r.text().then(function (txt) {
+            var t = String(txt || "").toLowerCase();
+            if (t.indexOf("alias en uso") >= 0) return "alias";
+            if (t.indexOf("nombre fijo") >= 0) return "fixed";
+            return "fail";
+          }).catch(function () { return "fail"; });
+        }).catch(function () { return "fail"; });
       }
       /* Vacía la cola de pendientes: cada semana pendiente se envía en
          trozos de hasta 56 (el máximo que acepta el servidor por
@@ -2480,20 +2512,59 @@
         if (!weeks.length) return;
         torneoFlushing = true;
         var sentAny = false;
+        var lockChanged = false;
+        var halted = false; // «alias en uso» / «nombre fijo»: el alias manda en todas las semanas
         var chain = Promise.resolve();
         weeks.forEach(function (week) {
           chain = chain.then(function () {
+            if (halted) return Promise.resolve();
             var left = torneo.pending[week] || 0;
             function step() {
               if (left <= 0) { delete torneo.pending[week]; torneoSave(); return Promise.resolve(); }
               var chunk = Math.min(56, left);
-              return torneoSendChunk(week, chunk).then(function (ok) {
-                if (!ok) { torneo.pending[week] = left; torneoSave(); return; }
-                sentAny = true;
-                left -= chunk;
+              return torneoSendChunk(week, chunk).then(function (res) {
+                if (res === "ok") {
+                  sentAny = true;
+                  if (torneo.taken) { torneo.taken = false; }
+                  // Envío aceptado: si es la semana en curso, el
+                  // nombre queda fijado en este teléfono (candado).
+                  if (week === weekKeyOf(new Date()) && torneo.lockedWeek !== week) {
+                    torneo.lockedWeek = week;
+                    lockChanged = true;
+                  }
+                  left -= chunk;
+                  torneo.pending[week] = left;
+                  torneoSave();
+                  return step();
+                }
                 torneo.pending[week] = left;
+                if (res === "alias") {
+                  // El nombre lo tiene otro teléfono esta semana: los
+                  // pendientes se quedan en cola y saldrán con el
+                  // nombre nuevo; se reabre el editor con el aviso.
+                  halted = true;
+                  torneo.taken = true;
+                  torneoSave();
+                  var cur = $("torneoAliasInput");
+                  var curVal = cur ? cur.value : null;
+                  torneoRenderId(true, "Ese nombre ya está en uso esta semana — escoge otro.");
+                  if (curVal !== null) { var ni = $("torneoAliasInput"); if (ni) ni.value = curVal; }
+                  return;
+                }
+                if (res === "fixed") {
+                  // Respaldo del servidor: este teléfono ya registró
+                  // otro nombre esta semana — se trata como fijado.
+                  halted = true;
+                  if (week === weekKeyOf(new Date()) && torneo.lockedWeek !== week) {
+                    torneo.lockedWeek = week;
+                    lockChanged = true;
+                  }
+                  torneoSave();
+                  if (!$("torneoAliasInput")) torneoRenderId(false, "");
+                  return;
+                }
                 torneoSave();
-                return step();
+                return;
               });
             }
             return step();
@@ -2501,6 +2572,10 @@
         });
         chain.then(function () {
           torneoFlushing = false;
+          // Si el candado se activó con este envío, la identidad se
+          // re-pinta (botón desactivado + nota) salvo que el jugador
+          // esté editando el nombre en este momento.
+          if (lockChanged && !$("torneoAliasInput")) torneoRenderId(false, "");
           if (sentAny) torneoRefresh();
         }).catch(function () { torneoFlushing = false; });
       }
@@ -2540,12 +2615,22 @@
       function torneoRenderId(editing, errMsg) {
         var box = $("torneoId");
         if (!box) return;
+        // Nombre rechazado por «alias en uso»: el editor se reabre
+        // con el aviso claro hasta que se guarde un nombre libre.
+        if (torneo.taken && torneo.alias && !editing) {
+          editing = true;
+          errMsg = "Ese nombre ya está en uso esta semana — escoge otro.";
+        }
         if (torneo.alias && !editing) {
+          var locked = torneoLocked();
           box.innerHTML =
             '<p class="torneo-id-line">Jugando como <b>' + torneoEsc(torneo.alias) + '</b> ' +
-            '<button class="torneo-btn ghost" id="torneoChangeBtn" type="button">Cambiar</button></p>' +
+            (locked
+              ? '<button class="torneo-btn ghost" type="button" disabled aria-disabled="true">Cambiar</button></p>' +
+                '<p class="torneo-note">Tu nombre de Copa queda fijo al sumar tus primeros puntos de la semana.</p>'
+              : '<button class="torneo-btn ghost" id="torneoChangeBtn" type="button">Cambiar</button></p>') +
             '<p class="torneo-err" id="torneoErr"></p>';
-          $("torneoChangeBtn").addEventListener("click", function () { torneoRenderId(true, ""); });
+          if (!locked) $("torneoChangeBtn").addEventListener("click", function () { torneoRenderId(true, ""); });
           return;
         }
         box.innerHTML =
@@ -2566,6 +2651,7 @@
             return;
           }
           torneo.alias = alias;
+          torneo.taken = false; // nombre nuevo: la cola de pendientes sale con él en cuanto se envíe
           if (!torneo.token) torneo.token = torneoUUID(); // cambiar el alias conserva el mismo token
           torneoSave();
           torneoRenderId(false, "");
@@ -2762,261 +2848,13 @@
         requestAnimationFrame(step);
       }
 
-      /* ================= Sonido (sintetizado, apagado por defecto) =================
-         Ambiente completo de la caseta, como en los videos de la pica
-         real: murmullo de feria, la manigueta del piquero (trinquete),
-         el traqueteo de madera y metal de la máquina, el público que
-         sube en la definición y la reacción al cantarse el ganador.
-         Todo WebAudio sintetizado, sin archivos, volumen conservador,
-         y NADA suena con el toggle apagado: los efectos cortos pasan
-         por un bus maestro que se apaga con el toggle, el ambiente se
-         detiene, y cada capa verifica soundOn antes de sonar.
-         La VOZ del piquero no se sintetiza: sus cantos quedan en texto. */
-      var soundOn = false, audioCtx = null, ambNodes = null, sfxBus = null;
-      /* Bus maestro de efectos cortos: apagar el toggle lo lleva a cero
-         en 0.12 s, así ni un aplauso a mitad de vuelo sigue sonando. */
-      function bus() {
-        if (!audioCtx) return null;
-        if (!sfxBus) {
-          sfxBus = audioCtx.createGain();
-          sfxBus.gain.value = 1;
-          sfxBus.connect(audioCtx.destination);
-        }
-        return sfxBus;
-      }
-      function busDuck() {
-        if (!sfxBus || !audioCtx) return;
-        try {
-          sfxBus.gain.cancelScheduledValues(audioCtx.currentTime);
-          sfxBus.gain.setValueAtTime(Math.max(0.0001, sfxBus.gain.value), audioCtx.currentTime);
-          sfxBus.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.12);
-        } catch (e) { /* sin bus que apagar */ }
-      }
-      function busRestore() {
-        if (!sfxBus || !audioCtx) return;
-        try {
-          sfxBus.gain.cancelScheduledValues(audioCtx.currentTime);
-          sfxBus.gain.setValueAtTime(Math.max(0.0001, sfxBus.gain.value), audioCtx.currentTime);
-          sfxBus.gain.exponentialRampToValueAtTime(1, audioCtx.currentTime + 0.08);
-        } catch (e) { /* sin bus que encender */ }
-      }
-      function beep(freq, t0, dur, type, gain) {
-        if (!soundOn || !audioCtx) return;
-        var o = audioCtx.createOscillator(), g = audioCtx.createGain();
-        o.type = type || "sine"; o.frequency.value = freq;
-        g.gain.setValueAtTime(gain || 0.12, audioCtx.currentTime + t0);
-        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + t0 + dur);
-        o.connect(g); g.connect(bus());
-        o.start(audioCtx.currentTime + t0); o.stop(audioCtx.currentTime + t0 + dur + 0.02);
-      }
-      /* Ráfaga de ruido corta y filtrada: la materia prima de los
-         sonidos mecánicos y del público (clics, golpes, palmas). */
-      function noiseBurst(when, dur, fType, freq, q, gain) {
-        if (!audioCtx) return;
-        var len = Math.max(1, Math.floor(audioCtx.sampleRate * dur));
-        var buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
-        var d = buf.getChannelData(0);
-        for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
-        var src = audioCtx.createBufferSource(); src.buffer = buf;
-        var f = audioCtx.createBiquadFilter(); f.type = fType; f.frequency.value = freq; f.Q.value = q;
-        var g = audioCtx.createGain(); g.gain.value = gain;
-        src.connect(f); f.connect(g); g.connect(bus());
-        src.start(when);
-      }
-      function clackSound() { // el «clac» del dominó al pinchar el billete
-        if (!soundOn || !audioCtx) return;
-        noiseBurst(audioCtx.currentTime, 0.02, "bandpass", 900 + Math.random() * 500, 1.1, 0.16);
-      }
-      /* LA MANIGUETA: clic de trinquete, corto, seco y metálico — muy
-         distinto del golpe de madera. El bucle de carrera lo repite
-         siguiendo la velocidad de la mesa. */
-      function ratchetSound() {
-        if (!soundOn || !audioCtx) return;
-        noiseBurst(audioCtx.currentTime, 0.016, "bandpass", 2000 + Math.random() * 500, 7, 0.085);
-      }
-      /* MADERA Y MECANISMO: golpe grave y hueco de los caballitos de
-         madera sobre los carriles, con variación de timbre y fuerza. */
-      function rattleSound() {
-        if (!soundOn || !audioCtx) return;
-        noiseBurst(audioCtx.currentTime, 0.055, "lowpass", 360 + Math.random() * 220, 0.7, 0.038 + Math.random() * 0.026);
-      }
-      function bellSound() { beep(1318, 0, 0.5, "sine", 0.14); beep(1975, 0, 0.35, "sine", 0.06); }
-      function fanfareSound() {
-        beep(523, 0, 0.16, "triangle", 0.16); beep(659, 0.14, 0.16, "triangle", 0.16);
-        beep(784, 0.28, 0.22, "triangle", 0.18); beep(1046, 0.46, 0.4, "triangle", 0.18);
-      }
-      /* El piquero engancha la manigueta al salir: una ráfaga de clics
-         de trinquete que acelera, como la palanca agarrando la máquina. */
-      function crankSound() {
-        if (!soundOn || !audioCtx) return;
-        var ivs = [105, 95, 86, 77, 68, 60, 53, 47, 42], acc = 0;
-        for (var i = 0; i < ivs.length; i++) { setTimeout(ratchetSound, acc); acc += ivs[i]; }
-      }
-      /* ============ MURMULLO DE FERIA ============
-         Dos capas bajo un mismo control: (1) el lecho grave de la
-         caseta — ruido marrón filtrado con respiración lenta — y
-         (2) la bulla de conversación colectiva — ruido en banda de voz
-         cuya ganancia vaga con tres LFO de ritmos inconmensurables,
-         para que suba y baje de forma irregular, como gente hablando.
-         Muy por debajo de campanas y manigueta. De vez en cuando, una
-         ráfaga lejana e indistinta (exclamación/risa del público,
-         deliberadamente sin forma de voz: a este volumen se lee como
-         bulla, no como una risa fingida). */
-      function startGallop(quiet) { startAmbience(quiet); }
-      function stopGallop() { stopAmbience(); }
-      function chatterBurst() {
-        if (!soundOn || !audioCtx || !ambNodes || ambNodes.quiet) return;
-        var t = audioCtx.currentTime + 0.05;
-        var nPulse = 3 + Math.floor(Math.random() * 3);
-        for (var i = 0; i < nPulse; i++) {
-          noiseBurst(t + i * (0.09 + Math.random() * 0.04), 0.05, "bandpass",
-            1350 + Math.random() * 550, 2.2, Math.max(0.006, 0.026 - i * 0.006));
-        }
-      }
-      function scheduleChatter() {
-        if (!ambNodes) return;
-        var mine = ambNodes;
-        mine.chatterTimer = setTimeout(function () {
-          if (ambNodes !== mine) return; // ambiente viejo: la cadena muere aquí
-          mine.chatterTimer = null;
-          chatterBurst();
-          scheduleChatter();
-        }, 7000 + Math.random() * 10000);
-      }
-      function startAmbience(quiet) {
-        if (!soundOn || !audioCtx || ambNodes) return;
-        try {
-          var sr = audioCtx.sampleRate, t = audioCtx.currentTime;
-          // Capa 1: lecho grave (ruido marrón, como el de antes)
-          var len = 2 * sr;
-          var buf = audioCtx.createBuffer(1, len, sr);
-          var d = buf.getChannelData(0);
-          var lastV = 0;
-          for (var i = 0; i < len; i++) {
-            var w = Math.random() * 2 - 1;
-            lastV = (lastV + 0.02 * w) / 1.02;
-            d[i] = lastV * 3.4;
-          }
-          var src = audioCtx.createBufferSource(); src.buffer = buf; src.loop = true;
-          var lp = audioCtx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 420;
-          var g = audioCtx.createGain();
-          var baseG = quiet ? 0.02 : 0.035;
-          g.gain.setValueAtTime(0.0001, t);
-          g.gain.exponentialRampToValueAtTime(baseG, t + 1.4);
-          var lfo = audioCtx.createOscillator(); lfo.frequency.value = 0.13;
-          var lg = audioCtx.createGain(); lg.gain.value = 0.011;
-          lfo.connect(lg); lg.connect(g.gain);
-          src.connect(lp); lp.connect(g); g.connect(audioCtx.destination);
-          // Capa 2: bulla de conversación (ruido blanco en banda de voz)
-          var buf2 = audioCtx.createBuffer(1, len, sr);
-          var d2 = buf2.getChannelData(0);
-          for (var j = 0; j < len; j++) d2[j] = Math.random() * 2 - 1;
-          var src2 = audioCtx.createBufferSource(); src2.buffer = buf2; src2.loop = true;
-          var bp = audioCtx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 640; bp.Q.value = 0.55;
-          var g2 = audioCtx.createGain(); g2.gain.value = quiet ? 0.006 : 0.012;
-          var lfoRates = [0.07, 0.19, 0.43], lfoDepths = [0.0075, 0.0048, 0.0028], lfos = [];
-          for (var k = 0; k < 3; k++) {
-            var lo = audioCtx.createOscillator(); lo.frequency.value = lfoRates[k];
-            var log = audioCtx.createGain(); log.gain.value = quiet ? lfoDepths[k] * 0.5 : lfoDepths[k];
-            lo.connect(log); log.connect(g2.gain);
-            lo.start(); lfos.push(lo);
-          }
-          src2.connect(bp); bp.connect(g2); g2.connect(audioCtx.destination);
-          src.start(); lfo.start(); src2.start();
-          ambNodes = { src: src, g: g, lfo: lfo, lp: lp, src2: src2, g2: g2, lfos: lfos,
-                       quiet: !!quiet, tension: 0, chatterTimer: null };
-          if (!quiet) scheduleChatter();
-        } catch (e) { ambNodes = null; }
-      }
-      /* EL PÚBLICO SUBE EN LA DEFINICIÓN: x de 0 (crucero) a 1 (último
-         carril). El murmullo crece en volumen, se abre el filtro (más
-         «tensión» en la bulla) y la respiración se acelera. En la
-         repetición el ambiente va en modo quiet y la tensión no aplica. */
-      function setCrowdTension(x) {
-        if (!ambNodes || !audioCtx || ambNodes.quiet) return;
-        ambNodes.tension = x;
-        var t = audioCtx.currentTime;
-        ambNodes.g.gain.setTargetAtTime(0.035 + 0.042 * x, t, 0.55);
-        ambNodes.lp.frequency.setTargetAtTime(420 + 280 * x, t, 0.55);
-        ambNodes.lfo.frequency.setTargetAtTime(0.13 + 0.5 * x, t, 0.55);
-        ambNodes.g2.gain.setTargetAtTime(0.012 + 0.017 * x, t, 0.55);
-      }
-      function stopAmbience() {
-        if (!ambNodes || !audioCtx) { ambNodes = null; return; }
-        var a = ambNodes; ambNodes = null;
-        if (a.chatterTimer) { clearTimeout(a.chatterTimer); a.chatterTimer = null; }
-        try {
-          var t = audioCtx.currentTime;
-          a.g.gain.cancelScheduledValues(t);
-          a.g.gain.setValueAtTime(Math.max(0.0001, a.g.gain.value), t);
-          a.g.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
-          a.g2.gain.cancelScheduledValues(t);
-          a.g2.gain.setValueAtTime(Math.max(0.0001, a.g2.gain.value), t);
-          a.g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
-          setTimeout(function () {
-            try { a.src.stop(); a.lfo.stop(); a.src2.stop(); } catch (e) { /* ya parado */ }
-            (a.lfos || []).forEach(function (l) { try { l.stop(); } catch (e) { /* ya parado */ } });
-          }, 500);
-        } catch (e) { /* sin ambiente que parar */ }
-      }
-      /* ============ CIERRE: REACCIÓN DEL PÚBLICO ============
-         Solo en la carrera de verdad (la repetición no pasa por aquí). */
-      function applauseSound() { // palmas sintetizadas: ráfagas irregulares que se apagan solas
-        if (!soundOn || !audioCtx) return;
-        var t = audioCtx.currentTime + 0.03;
-        for (var i = 0; i < 30; i++) {
-          var tt = t + Math.pow(Math.random(), 1.25) * 1.35;
-          noiseBurst(tt, 0.028, "bandpass", 1150 + Math.random() * 450, 1.1,
-            0.05 + Math.random() * 0.09 * (1 - (tt - t) / 1.6));
-        }
-      }
-      function crowdCheer() { // la algarabía: la bulla sube de golpe y se asienta en ~2 s
-        if (!soundOn || !audioCtx) return;
-        try {
-          var sr = audioCtx.sampleRate, t = audioCtx.currentTime;
-          var buf = audioCtx.createBuffer(1, Math.floor(2.1 * sr), sr);
-          var d = buf.getChannelData(0);
-          for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-          var src = audioCtx.createBufferSource(); src.buffer = buf;
-          var bp = audioCtx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 880; bp.Q.value = 0.5;
-          var g = audioCtx.createGain();
-          g.gain.setValueAtTime(0.0001, t);
-          g.gain.exponentialRampToValueAtTime(0.085, t + 0.28);
-          g.gain.exponentialRampToValueAtTime(0.0001, t + 2.0);
-          src.connect(bp); bp.connect(g); g.connect(bus());
-          src.start(t); src.stop(t + 2.1);
-        } catch (e) { /* sin algarabía que sonar */ }
-      }
-      function crowdGroan() { // el «uuuh» colectivo: ruido en banda que CAE, sin voz fingida
-        if (!soundOn || !audioCtx) return;
-        try {
-          var sr = audioCtx.sampleRate, t = audioCtx.currentTime;
-          var buf = audioCtx.createBuffer(1, Math.floor(1.25 * sr), sr);
-          var d = buf.getChannelData(0);
-          for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-          var src = audioCtx.createBufferSource(); src.buffer = buf;
-          var bp = audioCtx.createBiquadFilter(); bp.type = "bandpass"; bp.Q.value = 1.1;
-          bp.frequency.setValueAtTime(620, t);
-          bp.frequency.exponentialRampToValueAtTime(285, t + 1.0);
-          var g = audioCtx.createGain();
-          g.gain.setValueAtTime(0.0001, t);
-          g.gain.exponentialRampToValueAtTime(0.05, t + 0.22);
-          g.gain.exponentialRampToValueAtTime(0.0001, t + 1.15);
-          src.connect(bp); bp.connect(g); g.connect(bus());
-          src.start(t); src.stop(t + 1.25);
-          // Zumbido colectivo apenas insinuado bajo el ruido (dos tonos que bajan)
-          [196, 185].forEach(function (fr) {
-            var o = audioCtx.createOscillator(), og = audioCtx.createGain();
-            o.type = "triangle"; o.frequency.setValueAtTime(fr, t);
-            o.frequency.exponentialRampToValueAtTime(fr * 0.76, t + 1.0);
-            og.gain.setValueAtTime(0.0001, t);
-            og.gain.exponentialRampToValueAtTime(0.016, t + 0.25);
-            og.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
-            o.connect(og); og.connect(bus());
-            o.start(t); o.stop(t + 1.2);
-          });
-        } catch (e) { /* sin reacción que sonar */ }
-      }
+      /* ================= SIN SONIDO (orden de René: «El sonido, quítalo») =================
+         El juego no reproduce ningún sonido ni crea jamás un nodo
+         de sonido: fuera ambiente, manigueta, tensión, aplausos,
+         «uuuh» y el «clac» de los dominós, y fuera su botón de la
+         cabecera. La VIBRACIÓN se queda: vive aparte, en vibrate(), y se
+         dispara desde los mismos eventos de la carrera. El
+         piquero sigue «hablando» en texto, como siempre. */
       function renderHistory() {
         var list = $("histList");
         list.innerHTML = "";
@@ -3190,7 +3028,7 @@
          La inclinación es SOLO de dibujo: vive en el transform del
          grupo de la escena. El juez (judgeFinals) mide sobre la
          geometría de los caminos, que ningún transform toca, y las
-         posiciones, los finales, los pagos y los sonidos no cambian.
+         posiciones, los finales y los pagos no cambian.
          Los caballitos se contra-escalan en Y dentro de su ancla
          (.upright) para verse DE PIE sobre la mesa inclinada, y las
          placas extienden su contra-escala del zoom a la inclinación.
@@ -3379,8 +3217,6 @@
               { transform: "translate(-50%,-50%) rotate(" + domRot + "deg)", opacity: "1" }
             ], { duration: DROP, delay: delay + DROP_AT, easing: "ease-out", fill: "backwards" });
           } catch (e) { /* sin WAAPI: los marcadores quedan puestos sin animación */ }
-          // El "clac" del dominó al pinchar el billete (solo si hay sonido)
-          betTimers.push(setTimeout(clackSound, delay + DROP_AT + Math.round(DROP * 0.58)));
         });
         if (reduced) { end(); return; }
         var total = (n - 1) * stagger + DROP_AT + DROP;
@@ -3409,7 +3245,6 @@
         $("resultPanel").classList.remove("open");
         board.querySelectorAll(".cell").forEach(function (c) { c.classList.remove("win-cell"); });
         for (var n = 1; n <= 24; n++) horseEls[n].classList.remove("dq", "winner");
-        startGallop();
 
         // Fase 1: el piquero acomoda los caballitos en la salida (tercer cuarto de
         // la pista). Fase 2: carrera hacia la meta que cada uno tiene de frente.
@@ -3483,7 +3318,7 @@
         // Reloj virtual de carrera: avanza con time-scale — 1 en crucero y se
         // estira suave (hasta ~0.42) en el último tramo de la definición:
         // esa es la cámara lenta del photo finish, sin tocar las posiciones
-        var vClock = 0, lastNow = null, nextRatchetT = GATHER, nextRattleT = GATHER + 70, lastTension = 0;
+        var vClock = 0, lastNow = null;
         var saidStart = false, saidMid = false, saidDale = false;
         // Narración en vivo: qué ya cantó el piquero en esta carrera
         var saidLane = {}, saidPass = {}, saidNear = false;
@@ -3507,26 +3342,6 @@
           stepCam(dtR);
           if (!reduced && raceT > GATHER + CRUISE) { camTarget.s = 1.75; camTarget.fx = 184; camTarget.fy = 72; tiltTargetY = 1; }
           else { camTarget.s = 1; camTarget.fx = 200; camTarget.fy = 150; tiltTargetY = reduced ? 1 : TILT_Y; }
-          // Ambiente sonoro de la caseta, sincronizado con la mesa:
-          // la MANIGUETA (trinquete seco) marca el ritmo del crucero y
-          // se va espaciando según la mesa desacelera, hasta callar con
-          // el último carril; el TRAQUETEO de madera acompaña más denso
-          // en crucero y ralo en la definición, sin tapar las campanas;
-          // y el MURMULLO del público crece en tensión durante la
-          // definición, como en los videos cuando se acerca el canto.
-          if (soundOn && raceT >= GATHER && raceT < GATHER + maxStop) {
-            var rtA = raceT - GATHER;
-            var pDef = rtA <= CRUISE ? 0 : clamp((rtA - CRUISE) / Math.max(1, maxStop - CRUISE), 0, 1);
-            if (raceT >= nextRatchetT) {
-              ratchetSound();
-              nextRatchetT = raceT + 105 + 580 * pDef * pDef;
-            }
-            if (raceT >= nextRattleT) {
-              rattleSound();
-              nextRattleT = raceT + (170 + 470 * pDef) * (0.8 + Math.random() * 0.45);
-            }
-            if (Math.abs(pDef - lastTension) > 0.04) { lastTension = pDef; setCrowdTension(pDef); }
-          }
           var done = raceT >= GATHER;
           for (var n = 1; n <= 24; n++) {
             var pos;
@@ -3558,7 +3373,6 @@
           }
           if (!saidStart && raceT >= GATHER) {
             saidStart = true;
-            crankSound();
             say("¡Salieron!");
           }
           if (!saidDale && raceT > GATHER + CRUISE * 0.45 && raceT <= GATHER + CRUISE) {
@@ -3571,11 +3385,10 @@
           }
           if (raceT > GATHER + CRUISE) {
             var rtNow = raceT - GATHER;
-            // El piquero canta cada carril cuando se detiene (con su campana)
+            // El piquero canta cada carril cuando se detiene
             for (var L = 0; L < 4; L++) {
               if (!saidLane[L] && rtNow >= laneStop[L]) {
                 saidLane[L] = true;
-                bellSound();
                 vibrate(30);
                 say("¡Se detuvo el carril " + (L + 1) + "!");
               }
@@ -3617,7 +3430,6 @@
 
       function finishRace(bet, winner, passed, gaps) {
         state.racing = false;
-        stopGallop();
         clearBetMarkers(); // al liquidar se recoge el dinero de la mesa
         // El cuadro congelado es el que dejó el bucle de carrera: horsePos
         // ya trae los finals que juzgó judgeFinals — dibujo y juicio son
@@ -3651,7 +3463,6 @@
           }
         } else {
           delta = -bet.amount;
-          crowdGroan(); // el «uuuh» colectivo cuando se va la jugada
           msg = "¡Salió el " + winner + "! Quedó más cerca de la meta sin pasarse. " +
                 (passed.length ? "Se pasaron: el " + passed.join(", el ") + ". " : "") +
                 "Tu jugada era " + bet.desc + " — la próxima es tuya.";
@@ -3669,9 +3480,6 @@
         if (won) {
           state.stats.wins++;
           state.stats.best = Math.max(state.stats.best, credited);
-          fanfareSound();
-          applauseSound(); // el público aplaude el canto del ganador
-          crowdCheer();
           vibrate([60, 40, 60, 40, 130]);
         }
         /* EL SCORE — dinero acumulado (definición de René): el total
@@ -3850,7 +3658,6 @@
         placeAllHorses();
         say("Repetición: así se definió la carrera…");
         if (!reducedMotion()) { camTarget.s = 1.75; camTarget.fx = 184; camTarget.fy = 72; tiltY = TILT_Y; tiltTargetY = 1; applyCam(); }
-        startGallop(true); // repetición: solo ambiente bajito, sin tensión ni reacciones
         var vClock = RACE_CRUISE, lastNow = null, saidLaneR = {};
         var maxStop = d.maxStop;
         function rframe(now) {
@@ -3866,15 +3673,14 @@
           stepCam(dt);
           for (var n = 1; n <= 24; n++) { horsePos[n] = posAt(n, rt, d); placeHorse(n); }
           for (var L = 0; L < 4; L++) {
-            if (!saidLaneR[L] && rt >= d.laneStop[L]) { saidLaneR[L] = true; bellSound(); vibrate(30); }
+            if (!saidLaneR[L] && rt >= d.laneStop[L]) { saidLaneR[L] = true; vibrate(30); }
           }
           if (rt < maxStop) { rafId = requestAnimationFrame(rframe); return; }
           for (n = 1; n <= 24; n++) horsePos[n] = d.finals[n];
-          state.racing = false; // cuadro final sin galope, idéntico al de la carrera
+          state.racing = false; // cuadro final, idéntico al de la carrera
           placeAllHorses();
           horseEls[d.winner].classList.add("winner");
           d.passed.forEach(function (x) { horseEls[x].classList.add("dq"); });
-          stopGallop();
           say("Esa fue la definición: ganó el " + d.winner + ".", true);
           showMedallion(d.winner, null); // la repetición corona igual: el mismo ganador del juez
           camHome();
@@ -3993,27 +3799,6 @@
         placeBets(amt, betObj.selection, function () { if (myFly !== flySeq) return; starting = false; runRace(betObj); });
       });
 
-      $("btnSound").addEventListener("click", function () {
-        soundOn = !soundOn;
-        if (soundOn) {
-          if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { audioCtx = null; } }
-          if (audioCtx && audioCtx.state === "suspended") {
-            var rp = audioCtx.resume();
-            if (rp && rp.catch) rp.catch(function () { /* el navegador lo reanuda en el próximo toque */ });
-          }
-          if (!audioCtx) soundOn = false;
-          else {
-            busRestore();
-            // Prender a mitad de carrera revive el ambiente en el acto
-            // (la manigueta y el traqueteo ya siguen solos desde el bucle)
-            if (state.racing) startAmbience(replaying);
-          }
-        } else { stopGallop(); busDuck(); }
-        this.title = soundOn ? "Sonido: encendido" : "Sonido: apagado"; this.setAttribute("aria-label", this.title);
-        this.classList.toggle("on", soundOn); this.classList.toggle("off", !soundOn);
-        this.setAttribute("aria-pressed", soundOn ? "true" : "false");
-        if (soundOn) bellSound();
-      });
       /* Loguitos de los negocios demo, SOLO para la hoja del
          auspiciador: la cara de cada espacio lleva únicamente el
          nombre (corrección de René — ni lema ni loguito en el
@@ -4276,7 +4061,6 @@
       $("btnResetNo").addEventListener("click", function () { $("confirmReset").classList.remove("open"); });
       $("btnResetSi").addEventListener("click", function () {
         if (rafId) cancelAnimationFrame(rafId);
-        stopGallop();
         // Limpia cualquier presentación de Fase A en curso (photo finish,
         // cámara, conteos) para que nada quede colgado tras el reinicio
         if (pfTimer) { clearTimeout(pfTimer); pfTimer = null; }
