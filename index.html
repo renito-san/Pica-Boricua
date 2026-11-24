@@ -1711,6 +1711,7 @@
       var COUNT_KEY = "picaspr_contadores_v1";
       var PEND_KEY  = "picaspr_pendiente_v1"; // apuesta descontada con carrera sin resolver
       var INSTALL_KEY = "picaspr_instalacion_v1"; // aviso de instalación descartado / app ya instalada
+      var INSTALLED_COUNTED_KEY = "picaspr_instalada_contada_v1"; // primera apertura como app instalada ya contada en GoatCounter
       var GAME_URL = "https://picaboricua.com/";
       // Contadores escondidos para el reporte del auspiciador (solo este teléfono)
       var counters = { visits: 0, sponsor: 0, shares: 0, ads: {}, month: null };
@@ -4165,6 +4166,30 @@
       function rememberInstallGone() {
         try { localStorage.setItem(INSTALL_KEY, "1"); } catch (e) { /* navegador privado */ }
       }
+      /* Medición de instalaciones (marketing): la primera vez que el
+         juego se abre como app instalada (standalone) se cuenta UNA
+         sola vez por dispositivo en GoatCounter. Es la única señal
+         posible en iPhone, donde no existe el evento appinstalled.
+         La marca se guarda aunque GoatCounter aún no haya cargado —
+         para no duplicar — y el envío reintenta unos segundos hasta
+         que el contador cargue. */
+      function countInstalledOpenOnce() {
+        if (!isStandalone()) return;
+        var already = false;
+        try { already = localStorage.getItem(INSTALLED_COUNTED_KEY) === "1"; } catch (e) { /* navegador privado */ }
+        if (already) return;
+        try { localStorage.setItem(INSTALLED_COUNTED_KEY, "1"); } catch (e) { /* navegador privado */ }
+        var sent = false, tries = 0;
+        (function attempt() {
+          if (sent) return;
+          try {
+            if (window.goatcounter && goatcounter.count) { goatcounter.count({ path: 'instalada-apertura', event: true }); sent = true; return; }
+          } catch (e) { /* GoatCounter no cargó: el juego sigue */ }
+          tries++;
+          if (tries < 20) setTimeout(attempt, 500);
+        })();
+      }
+      countInstalledOpenOnce();
       function isIOSDevice() {
         var ua = navigator.userAgent || "";
         return /iphone|ipad|ipod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -4192,6 +4217,7 @@
         updateInstallBar();
       });
       window.addEventListener("appinstalled", function () {
+        try { if (window.goatcounter && goatcounter.count) goatcounter.count({ path: 'instalar', event: true }); } catch (e) { /* GoatCounter no cargó: el juego sigue */ }
         deferredInstallPrompt = null;
         rememberInstallGone();
         var bar = $("installBar");
