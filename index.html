@@ -4230,23 +4230,43 @@
       $("btnHelpClose").addEventListener("click", function () { $("helpModal").classList.remove("open"); });
       $("helpModal").addEventListener("click", function (e) { if (e.target === this) this.classList.remove("open"); });
 
-      /* Pop-up de bienvenida: solo la primera visita. Al cerrarse por
-         cualquier vía (X, «¡A jugar!» o el fondo) se marca como visto
-         en la clave picaspr_bienvenida_v1 y no vuelve a salir. Sin
-         sonido: no llama a PicaSnd en ningún momento. */
+      /* Pop-up de bienvenida: solo la primera visita.
+         CORRECCIÓN (René: «No me salió»): la clave v1 quedó marcada
+         como vista en su teléfono en la primera apertura de la v11
+         sin que él lo viera — el velo cubre toda la pantalla desde
+         el primer instante de la carga, así que el primer toque que
+         dio al entrar a jugar cayó sobre el fondo, cerró el pop-up
+         y lo quemó para siempre. Dos arreglos:
+         · Clave NUEVA (v2): quien perdió la v1 sin verla vuelve a
+           recibir la bienvenida como visitante nuevo. Las demás
+           claves (saldo, récord, nivel, torneo) no se tocan.
+         · La marca de «visto» SOLO la guarda un cierre deliberado:
+           la X o «¡A jugar!». Tocar el fondo lo cierra por esa
+           visita (sigue siendo rápido de cerrar), pero no quema la
+           marca — y el fondo ni siquiera responde durante los
+           primeros 900 ms, para que un toque que ya venía en camino
+           mientras la página cargaba no lo mate antes de pintarse.
+         Sin sonido: no llama a PicaSnd en ningún momento. */
       (function () {
-        var WELCOME_KEY = "picaspr_bienvenida_v1";
+        var WELCOME_KEY = "picaspr_bienvenida_v2";
         var seen = false;
         try { seen = localStorage.getItem(WELCOME_KEY) === "1"; } catch (e) { /* navegador privado: se muestra */ }
         if (seen) return;
         var veil = $("welcomeModal");
-        function closeWelcome() {
+        var shownAt = Date.now();
+        function closeWelcome(markSeen) {
           veil.classList.remove("open");
-          try { localStorage.setItem(WELCOME_KEY, "1"); } catch (e) { /* navegador privado */ }
+          if (markSeen) {
+            try { localStorage.setItem(WELCOME_KEY, "1"); } catch (e) { /* navegador privado */ }
+          }
         }
-        $("btnWelcomeClose").addEventListener("click", closeWelcome);
-        $("btnWelcomePlay").addEventListener("click", closeWelcome);
-        veil.addEventListener("click", function (e) { if (e.target === this) closeWelcome(); });
+        $("btnWelcomeClose").addEventListener("click", function () { closeWelcome(true); });
+        $("btnWelcomePlay").addEventListener("click", function () { closeWelcome(true); });
+        veil.addEventListener("click", function (e) {
+          if (e.target !== this) return;
+          if (Date.now() - shownAt < 900) return; // toque en vuelo durante la carga: no cierra ni quema
+          closeWelcome(false); // fondo: cierra esta visita, sin marcar visto
+        });
         veil.classList.add("open");
       })();
 
