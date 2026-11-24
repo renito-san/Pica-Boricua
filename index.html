@@ -1161,6 +1161,14 @@
       @media (prefers-color-scheme: dark) { .modal h2 { color: var(--gold-soft); } }
       .modal p, .modal li { font-size: .94rem; line-height: 1.5; font-weight: 600; }
       .modal ul { margin: 6px 0 10px; padding-left: 20px; }
+      .faq-title {
+        font-family: "Bangers", sans-serif; letter-spacing: .05em;
+        margin: 16px 0 6px; font-size: 1.18rem; line-height: 1.15; color: var(--green-dark);
+      }
+      @media (prefers-color-scheme: dark) { .faq-title { color: var(--gold-soft); } }
+      .faq-item { margin: 0 0 10px; }
+      .faq-q { display: block; font-weight: 900; color: var(--ink); margin-bottom: 2px; }
+      .faq-a { font-weight: 600; color: var(--ink); }
       .help-report { margin: 12px 0 2px; font-size: .88rem; line-height: 1.4; font-weight: 700; text-align: center; }
       .help-report a { display: inline-block; padding: 6px 4px; color: var(--green-dark); font-weight: 900; text-decoration: underline; text-underline-offset: 3px; }
       @media (prefers-color-scheme: dark) { .help-report a { color: var(--gold-soft); } }
@@ -1606,6 +1614,14 @@
           <li><strong>Bajando</strong> — una columna de 4 números. Paga 5×, máximo $20.</li>
         </ul>
         <p>Empiezas con $50 ficticios; si llegas a $0 la casa te repone, y el tope es $1,000. Sin dinero real, como debe ser fuera de las Fiestas Patronales.</p>
+        <h3 class="faq-title">Preguntas frecuentes</h3>
+        <p class="faq-item"><strong class="faq-q">Se me borró mi progreso, ¿qué pasó?</strong><span class="faq-a">Tu progreso se guarda en este teléfono y este navegador, no en una cuenta. Si borras los datos del navegador, cambias de teléfono o abres el juego en otro navegador, empiezas de cero.</span></p>
+        <p class="faq-item"><strong class="faq-q">¿Cómo se gana una carrera?</strong><span class="faq-a">No gana el primero que cruza: gana el que queda más cerca de la última línea blanca (la META) sin pasarse. El que se pasa queda fuera, como en las picas de verdad.</span></p>
+        <p class="faq-item"><strong class="faq-q">¿El dinero es real?</strong><span class="faq-a">No. El saldo es ficticio; es un juego de entretenimiento.</span></p>
+        <p class="faq-item"><strong class="faq-q">Mis puntos del Torneo no subieron.</strong><span class="faq-a">Se envían solos al terminar cada carrera; sin conexión quedan en cola y suben cuando vuelva el internet y abras el juego.</span></p>
+        <p class="faq-item"><strong class="faq-q">¿Por qué no puedo cambiar mi nombre de la Copa?</strong><span class="faq-a">Queda fijo durante la semana al sumar tus primeros puntos, para que nadie se haga pasar por otro. El lunes puedes cambiarlo.</span></p>
+        <p class="faq-item"><strong class="faq-q">El juego no suena, ¿está dañado?</strong><span class="faq-a">No: Pica Boricua es silencioso a propósito. Sí vibra en los momentos clave si tu teléfono lo permite.</span></p>
+        <p class="faq-item"><strong class="faq-q">¿Cómo instalo el juego?</strong><span class="faq-a">iPhone: Safari → Compartir → «Añadir a pantalla de inicio». Android: Chrome → menú ⋮ → «Instalar app».</span></p>
         <p class="help-report"><a href="https://docs.google.com/forms/d/e/1FAIpQLSfJlAQjJcBh7oPLrFhdIkHHgHCddFWGzmeoYVLC3lZGxseZhw/viewform" target="_blank" rel="noopener">¿Un problema o una sugerencia? Cuéntanos aquí</a></p>
         <button class="close" id="btnHelpClose" type="button">Entendido — ¡a jugar!</button>
       </div>
