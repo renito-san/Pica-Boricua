@@ -1,5 +1,5 @@
 // Pica Boricua — service worker (cache-first, caché versionada)
-const CACHE_NAME = "pica-boricua-v9";
+const CACHE_NAME = "pica-boricua-v10";
 const PRECACHE_URLS = [
   "./",
   "./index.html",
