@@ -316,6 +316,84 @@
         margin: 0 0 8px; font-size: .86rem; font-weight: 900; color: #b8860b;
       }
       .copa-title-line[hidden] { display: none; }
+      /* ===== TORNEO EN LÍNEA (Fase 2, bloque bajo la Copa local) =====
+         Vive DENTRO del mismo pliegue, debajo de la Copa contra metas,
+         separado por una raya dorada: es otra cosa — la tabla real
+         contra todos los jugadores (Supabase). Mismos paneles y tintas
+         de la casa; el oro marca lo que es en línea. */
+      .torneo-block {
+        margin-top: 14px; padding-top: 12px;
+        border-top: 2px solid var(--gold);
+      }
+      .torneo-name {
+        display: flex; align-items: center; gap: 7px;
+        margin: 0 0 4px;
+        font-family: "Bangers", sans-serif; letter-spacing: .05em;
+        font-size: 1.05rem; color: var(--green-dark);
+      }
+      @media (prefers-color-scheme: dark) { .torneo-name { color: var(--gold-soft); } }
+      .torneo-name svg { width: 19px; height: 19px; flex: 0 0 auto; color: #b8860b; }
+      .torneo-id { margin: 8px 0 4px; }
+      .torneo-id-line { margin: 0; font-size: .88rem; font-weight: 800; color: var(--ink); line-height: 1.35; }
+      .torneo-id-line b { color: var(--green-dark); }
+      @media (prefers-color-scheme: dark) { .torneo-id-line b { color: var(--gold-soft); } }
+      .torneo-form { display: flex; gap: 7px; align-items: stretch; margin-top: 6px; }
+      .torneo-input {
+        flex: 1 1 auto; min-width: 0;
+        font-family: inherit; font-size: .95rem; font-weight: 800;
+        color: var(--ink); background: var(--cell);
+        border: 1.5px solid var(--line); border-radius: 8px;
+        padding: 8px 10px; min-height: 40px; outline: none;
+      }
+      .torneo-input::placeholder { color: var(--ink-soft); font-weight: 700; }
+      .torneo-btn {
+        flex: 0 0 auto; font-family: inherit; font-weight: 900; cursor: pointer;
+        background: var(--gold); color: #4a2c00; border: 1.5px solid #a86e00;
+        border-radius: 8px; padding: 8px 13px; min-height: 40px; font-size: .88rem;
+      }
+      .torneo-btn:active { transform: scale(.97); }
+      .torneo-btn.ghost {
+        background: transparent; color: var(--ink-soft);
+        border-color: var(--line); padding: 8px 10px;
+      }
+      .torneo-err { margin: 5px 0 0; font-size: .78rem; font-weight: 800; color: #ffd2cc; line-height: 1.3; }
+      @media (prefers-color-scheme: dark) { .torneo-err { color: #ff9a9a; } }
+      .torneo-err:empty { display: none; }
+      .torneo-status { margin: 8px 0 4px; font-size: .84rem; font-weight: 700; color: var(--ink-soft); line-height: 1.4; }
+      .torneo-top { list-style: none; margin: 6px 0 4px; padding: 0; counter-reset: rk; }
+      .torneo-top li {
+        display: flex; align-items: baseline; gap: 8px;
+        padding: 5px 2px; border-top: 1px dashed var(--line);
+        font-size: .88rem; font-weight: 700; color: var(--ink-soft);
+      }
+      .torneo-top li:first-child { border-top: none; }
+      .torneo-top .rk {
+        flex: 0 0 26px; font-weight: 900; color: var(--ink);
+        font-size: .8rem; text-align: right;
+      }
+      .torneo-top .al { flex: 1 1 auto; min-width: 0; font-weight: 900; color: var(--ink); overflow-wrap: anywhere; }
+      .torneo-top .pt { flex: 0 0 auto; font-weight: 900; color: var(--green-dark); white-space: nowrap; }
+      @media (prefers-color-scheme: dark) { .torneo-top .pt { color: var(--gold-soft); } }
+      .torneo-top li.mine { background: rgba(255,224,138,.13); border-radius: 6px; }
+      .torneo-top li.mine .al::after { content: " · tú"; color: #b8860b; font-size: .74rem; letter-spacing: .04em; }
+      .torneo-me {
+        margin: 6px 0 2px; font-size: .88rem; font-weight: 900; color: var(--ink); line-height: 1.4;
+      }
+      .torneo-me:empty { display: none; }
+      .torneo-champs-title {
+        margin: 14px 0 4px; font-size: .8rem; font-weight: 900;
+        letter-spacing: .1em; text-transform: uppercase; color: #b8860b;
+      }
+      .torneo-champs { list-style: none; margin: 0; padding: 0; }
+      .torneo-champs li {
+        display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+        padding: 5px 2px; border-top: 1px dashed var(--line);
+        font-size: .86rem; font-weight: 700; color: var(--ink-soft);
+      }
+      .torneo-champs li:first-child { border-top: none; }
+      .torneo-champs .ch-al { font-weight: 900; color: var(--ink); }
+      .torneo-champs .ch-pt { font-weight: 900; color: var(--green-dark); white-space: nowrap; }
+      @media (prefers-color-scheme: dark) { .torneo-champs .ch-pt { color: var(--gold-soft); } }
       /* ===== BANNER DEL AUSPICIADOR PRINCIPAL (bloque aparte) =====
          Precisión de René: el presentador NO es una línea dentro del
          panel rojo — es un BANNER COMPLETO con identidad visual
@@ -1472,6 +1550,18 @@
             </ul>
             <p class="copa-title-line" id="copaTitleLine" hidden></p>
             <p class="sponsor-note">Torneo local de este teléfono, contra metas. Cada carrera suma a la Copa los mismos puntos de caseta que suma a tu nivel mientras la semana corre; al cambiar la semana, el contador de la Copa arranca en cero y el título de la semana anterior queda anotado en el Historial.</p>
+
+            <div class="torneo-block" id="torneoBlock">
+              <p class="torneo-name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.9 5.7 3.9 9S14.5 18.4 12 21c-2.5-2.6-3.9-5.7-3.9-9S9.5 5.6 12 3z"/></svg><span>TORNEO EN LÍNEA</span></p>
+              <p class="sponsor-note">Torneo en línea — todos los jugadores. La misma semana (lunes a domingo) y los mismos puntos de cada carrera, pero contra la tabla real: el #1 de la semana queda coronado en el muro de campeones.</p>
+              <div class="torneo-id" id="torneoId"></div>
+              <p class="torneo-status" id="torneoStatus">La tabla se busca al abrir este pliegue.</p>
+              <ol class="torneo-top" id="torneoTop"></ol>
+              <p class="torneo-me" id="torneoMe"></p>
+              <p class="torneo-champs-title">Campeones de la Copa</p>
+              <ul class="torneo-champs" id="torneoChamps"></ul>
+              <p class="torneo-status" id="torneoChampsStatus"></p>
+            </div>
           </div>
         </details>
 
@@ -2304,6 +2394,284 @@
         if (cl) cl.textContent = "Copas: " + state.stats.copaFin + (state.stats.copaFin === 1 ? " vez" : " veces") +
           " Finalista · " + state.stats.copaCam + (state.stats.copaCam === 1 ? " vez" : " veces") + " Campeón";
       }
+      /* ================= TORNEO EN LÍNEA (Fase 2 · Supabase) =================
+         La tabla real contra todos los jugadores, EN PARALELO a la Copa
+         local contra metas (que no se toca): los mismos puntos de cada
+         carrera y la MISMA clave de semana (lunes, YYYY-MM-DD, la de
+         weekKeyOf/copaBucket) se envían al servidor con la función
+         submit_points, que valida el delta (1–56) y suma por
+         (device_token, semana). La identidad vive en su PROPIA clave
+         (TORNEO_KEY): alias visible + device_token privado de este
+         aparato (jamás se pide en lecturas ni se muestra). Todo es
+         asíncrono y con try/catch: si el envío falla (sin conexión,
+         dentro de Muse, lo que sea), el delta queda PENDIENTE en el
+         mismo guardado y se reintenta al cargar el juego y tras la
+         próxima carrera. El juego jamás se bloquea ni enseña errores
+         por el torneo; la Copa local sigue mandando. */
+      var TORNEO_KEY = "picaspr_torneo_v1";
+      var SB_URL = "https://phaxlxnhkimcwbfdfyya.supabase.co";
+      var SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBoYXhseG5oa2ltY3diZmRmeXlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU0NzkyNTcsImV4cCI6MjExMTA1NTI1N30.NN3MRDNFc1gqup5dvwLwLE7JIEOVrHycFQ61BMHnMqk";
+      var torneo = { alias: "", token: "", pending: {}, closeFor: "" };
+      var torneoFlushing = false;
+      function torneoSave() {
+        try { localStorage.setItem(TORNEO_KEY, JSON.stringify(torneo)); } catch (e) { /* navegador privado */ }
+      }
+      function torneoLoad() {
+        try {
+          var t = JSON.parse(localStorage.getItem(TORNEO_KEY) || "null");
+          if (t && typeof t === "object") {
+            torneo.alias = typeof t.alias === "string" ? t.alias : "";
+            torneo.token = typeof t.token === "string" ? t.token : "";
+            torneo.pending = (t.pending && typeof t.pending === "object") ? t.pending : {};
+            torneo.closeFor = typeof t.closeFor === "string" ? t.closeFor : "";
+          }
+        } catch (e) { /* sin guardado: se entra al torneo cuando el jugador quiera */ }
+      }
+      function torneoUUID() {
+        try {
+          if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+        } catch (e) { /* sigue el respaldo */ }
+        var b = new Uint8Array(16);
+        try { crypto.getRandomValues(b); } catch (e) {
+          for (var i = 0; i < 16; i++) b[i] = Math.floor(Math.random() * 256);
+        }
+        b[6] = (b[6] & 0x0f) | 0x40; b[8] = (b[8] & 0x3f) | 0x80;
+        var h = "";
+        for (var j = 0; j < 16; j++) h += ("0" + b[j].toString(16)).slice(-2);
+        return h.slice(0, 8) + "-" + h.slice(8, 12) + "-" + h.slice(12, 16) + "-" + h.slice(16, 20) + "-" + h.slice(20);
+      }
+      /* Saneado del alias: letras (con acentos y ñ), números y espacios;
+         espacios repetidos colapsan y el largo manda la validación 3–14. */
+      function torneoSanitize(raw) {
+        return String(raw == null ? "" : raw)
+          .replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 ]/g, "")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 14);
+      }
+      function torneoEsc(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+        });
+      }
+      function sbHeaders() {
+        return { "apikey": SB_ANON, "Authorization": "Bearer " + SB_ANON, "Content-Type": "application/json" };
+      }
+      /* Envío de UN delta ya troceado (1–56) por la RPC del servidor.
+         Devuelve true solo si el servidor aceptó; cualquier fallo
+         (red, HTTP, JSON) devuelve false y el delta se queda pendiente. */
+      function torneoSendChunk(week, delta) {
+        return fetch(SB_URL + "/rest/v1/rpc/submit_points", {
+          method: "POST", headers: sbHeaders(),
+          body: JSON.stringify({ p_alias: torneo.alias, p_token: torneo.token, p_week: week, p_delta: delta })
+        }).then(function (r) { return !!r.ok; }).catch(function () { return false; });
+      }
+      /* Vacía la cola de pendientes: cada semana pendiente se envía en
+         trozos de hasta 56 (el máximo que acepta el servidor por
+         llamada). Si un trozo falla, esa semana se queda pendiente
+         entera para el próximo intento. Tras un envío con éxito se
+         refresca la tabla (si el pliegue está abierto, se ve al momento). */
+      function torneoFlushPending() {
+        if (torneoFlushing) return;
+        if (!torneo.alias || !torneo.token) return;
+        var weeks = Object.keys(torneo.pending).filter(function (w) { return torneo.pending[w] > 0; });
+        if (!weeks.length) return;
+        torneoFlushing = true;
+        var sentAny = false;
+        var chain = Promise.resolve();
+        weeks.forEach(function (week) {
+          chain = chain.then(function () {
+            var left = torneo.pending[week] || 0;
+            function step() {
+              if (left <= 0) { delete torneo.pending[week]; torneoSave(); return Promise.resolve(); }
+              var chunk = Math.min(56, left);
+              return torneoSendChunk(week, chunk).then(function (ok) {
+                if (!ok) { torneo.pending[week] = left; torneoSave(); return; }
+                sentAny = true;
+                left -= chunk;
+                torneo.pending[week] = left;
+                torneoSave();
+                return step();
+              });
+            }
+            return step();
+          });
+        });
+        chain.then(function () {
+          torneoFlushing = false;
+          if (sentAny) torneoRefresh();
+        }).catch(function () { torneoFlushing = false; });
+      }
+      /* Al liquidarse cada carrera: el MISMO delta de puntos que sumó
+         a la Copa local se encola para el torneo (con clamp defensivo
+         a 56 por llamada — la cola lo trocea) y se intenta el envío.
+         Sin alias no hay llamada alguna: el juego corre igual. */
+      function torneoOnRace(pts) {
+        try {
+          if (!torneo.alias || !torneo.token) return;
+          var delta = Math.max(0, Math.min(56, Math.floor(pts) || 0)); // clamp defensivo: 56 es el máximo teórico por carrera
+          if (delta <= 0) return;
+          var week = state.stats.copaWeek || weekKeyOf(new Date());
+          torneo.pending[week] = (torneo.pending[week] || 0) + delta;
+          torneoSave();
+          torneoFlushPending();
+        } catch (e) { /* el torneo nunca rompe la liquidación */ }
+      }
+      /* Cierre de semana: al cargar, la semana pasada (lunes anterior)
+         se manda a coronar UNA vez por semana — el servidor valida que
+         sea pasada, corona al #1 y es idempotente. */
+      function torneoClosePrevWeek() {
+        try {
+          var prev = new Date(); prev.setDate(prev.getDate() - 7);
+          var prevKey = weekKeyOf(prev);
+          if (!prevKey || prevKey >= weekKeyOf(new Date())) return;
+          if (torneo.closeFor === prevKey) return;
+          torneo.closeFor = prevKey;
+          torneoSave();
+          fetch(SB_URL + "/rest/v1/rpc/close_week", {
+            method: "POST", headers: sbHeaders(),
+            body: JSON.stringify({ p_week: prevKey })
+          }).catch(function () { /* sin conexión: se reintenta en la próxima carga de otra semana */ });
+        } catch (e) { /* el cierre nunca bloquea el arranque */ }
+      }
+      /* ---------- Identidad en el pliegue ---------- */
+      function torneoRenderId(editing, errMsg) {
+        var box = $("torneoId");
+        if (!box) return;
+        if (torneo.alias && !editing) {
+          box.innerHTML =
+            '<p class="torneo-id-line">Jugando como <b>' + torneoEsc(torneo.alias) + '</b> ' +
+            '<button class="torneo-btn ghost" id="torneoChangeBtn" type="button">Cambiar</button></p>' +
+            '<p class="torneo-err" id="torneoErr"></p>';
+          $("torneoChangeBtn").addEventListener("click", function () { torneoRenderId(true, ""); });
+          return;
+        }
+        box.innerHTML =
+          (torneo.alias ? "" : '<p class="torneo-id-line">Entra al torneo con tu alias de jugador:</p>') +
+          '<div class="torneo-form">' +
+            '<input class="torneo-input" id="torneoAliasInput" type="text" maxlength="14" autocomplete="off" autocapitalize="words" placeholder="Tu alias (3–14)" value="' + torneoEsc(torneo.alias || "") + '" aria-label="Tu alias de jugador" />' +
+            '<button class="torneo-btn" id="torneoJoinBtn" type="button">' + (torneo.alias ? "Guardar" : "Entrar al torneo") + '</button>' +
+            (torneo.alias ? '<button class="torneo-btn ghost" id="torneoCancelBtn" type="button">Cancelar</button>' : "") +
+          '</div>' +
+          '<p class="torneo-err" id="torneoErr">' + torneoEsc(errMsg || "") + '</p>';
+        var input = $("torneoAliasInput");
+        $("torneoJoinBtn").addEventListener("click", function () {
+          var alias = torneoSanitize(input.value);
+          if (alias.length < 3 || alias.length > 14) {
+            torneoRenderId(!!torneo.alias, "El alias lleva de 3 a 14 caracteres: letras, números y espacios.");
+            var again = $("torneoAliasInput");
+            if (again) { again.value = input.value; again.focus(); }
+            return;
+          }
+          torneo.alias = alias;
+          if (!torneo.token) torneo.token = torneoUUID(); // cambiar el alias conserva el mismo token
+          torneoSave();
+          torneoRenderId(false, "");
+          torneoFlushPending();
+          torneoRefresh();
+        });
+        if (torneo.alias) {
+          $("torneoCancelBtn").addEventListener("click", function () { torneoRenderId(false, ""); });
+        }
+        input.addEventListener("keydown", function (ev) {
+          if (ev.key === "Enter") { ev.preventDefault(); $("torneoJoinBtn").click(); }
+        });
+      }
+      /* ---------- Tabla de la semana + muro de campeones ---------- */
+      function torneoFechaSemana(weekKey) {
+        var p = String(weekKey || "").split("-");
+        if (p.length !== 3) return String(weekKey || "");
+        var d = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+        if (isNaN(d.getTime())) return String(weekKey || "");
+        return "lunes " + fmtDia(d) + " de " + d.getFullYear();
+      }
+      function torneoRefresh() {
+        var statusEl = $("torneoStatus"), topEl = $("torneoTop"), meEl = $("torneoMe");
+        var chEl = $("torneoChamps"), chSt = $("torneoChampsStatus");
+        if (!statusEl || !topEl) return;
+        var week = weekKeyOf(new Date());
+        statusEl.textContent = "Buscando la tabla…";
+        // Lectura pública: SOLO alias y puntos — el device_token jamás se pide.
+        fetch(SB_URL + "/rest/v1/scores?week=eq." + encodeURIComponent(week) +
+              "&select=alias,points&order=points.desc,updated_at.asc&limit=200",
+              { headers: sbHeaders() })
+          .then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.json(); })
+          .then(function (rows) {
+            if (!Array.isArray(rows)) rows = [];
+            if (!rows.length) {
+              topEl.innerHTML = "";
+              meEl.textContent = "";
+              statusEl.textContent = "Sé el primero en la tabla — esta semana aún no tiene jugadores en línea.";
+              return;
+            }
+            var html = "";
+            var top = rows.slice(0, 10);
+            var mineMarked = false;
+            top.forEach(function (row, i) {
+              var mine = !!torneo.alias && row.alias === torneo.alias && !mineMarked;
+              if (mine) mineMarked = true;
+              html += '<li' + (mine ? ' class="mine"' : "") + '><span class="rk">#' + (i + 1) + '</span>' +
+                '<span class="al">' + torneoEsc(row.alias) + '</span>' +
+                '<span class="pt">' + (row.points || 0) + ' pts</span></li>';
+            });
+            topEl.innerHTML = html;
+            statusEl.textContent = "Tabla de esta semana · " + rows.length + (rows.length === 1 ? " jugador en línea" : " jugadores en línea");
+            if (!torneo.alias) {
+              meEl.textContent = "Entra al torneo para aparecer en la tabla.";
+              return;
+            }
+            var myPts = null;
+            rows.forEach(function (row) { if (row.alias === torneo.alias && myPts === null) myPts = row.points || 0; });
+            if (myPts === null) {
+              meEl.textContent = "Aún no apareces — corre tu primera carrera.";
+            } else {
+              var ahead = 0;
+              rows.forEach(function (row) { if ((row.points || 0) > myPts) ahead++; });
+              meEl.textContent = "Vas #" + (ahead + 1) + " de " + rows.length + (rows.length === 1 ? " jugador" : " jugadores") +
+                " · tus puntos en línea: " + myPts;
+            }
+          })
+          .catch(function () {
+            topEl.innerHTML = "";
+            meEl.textContent = "";
+            statusEl.textContent = "Sin conexión con el torneo — tu Copa local sigue contando.";
+          });
+        if (chEl) {
+          fetch(SB_URL + "/rest/v1/champions?select=week,alias,points&order=week.desc&limit=12",
+                { headers: sbHeaders() })
+            .then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.json(); })
+            .then(function (rows) {
+              if (!Array.isArray(rows) || !rows.length) {
+                chEl.innerHTML = "";
+                if (chSt) chSt.textContent = "El primer campeón se corona este lunes.";
+                return;
+              }
+              var html = "";
+              rows.forEach(function (row) {
+                html += '<li><span>Semana del ' + torneoEsc(torneoFechaSemana(row.week)) + ' — <span class="ch-al">' +
+                  torneoEsc(row.alias) + '</span></span><span class="ch-pt">' + (row.points || 0) + ' pts</span></li>';
+              });
+              chEl.innerHTML = html;
+              if (chSt) chSt.textContent = "";
+            })
+            .catch(function () {
+              chEl.innerHTML = "";
+              if (chSt) chSt.textContent = "Sin conexión con el torneo — el muro se busca de nuevo al abrir el pliegue.";
+            });
+        }
+      }
+      function torneoInit() {
+        torneoLoad();
+        torneoRenderId(false, "");
+        torneoClosePrevWeek();
+        torneoFlushPending(); // reintenta lo pendiente de sesiones anteriores
+        var fold = $("copaFold");
+        if (fold) {
+          fold.addEventListener("toggle", function () { if (fold.open) torneoRefresh(); });
+          if (fold.open) torneoRefresh();
+        }
+      }
+
       /* Las dos marcas del dinero acumulado: la pastilla dorada del
          panel (saldo máximo) y la línea de marcas del Historial
          (saldo máximo + total ganado de por vida en la caseta). */
@@ -3353,6 +3721,7 @@
         save();
         renderHistory();
         renderStats();
+        try { torneoOnRace(pts); } catch (e) { /* el torneo en línea jamás bloquea la liquidación */ }
         renderSponsorLine(); // refresca también la línea mensual (carreras del mes)
         say((won ? "¡Págale el " + winner + "!" : "¡Salió el " + winner + "!") +
             (newRecord ? " ¡Nuevo récord de la caseta!" : "") +
@@ -4023,6 +4392,7 @@
       renderStats();
       updateJugada();
       updateInstallBar();
+      try { torneoInit(); } catch (e) { /* el torneo en línea es paralelo: si algo falla, el juego arranca igual */ }
     </script>
     <script data-goatcounter="https://picaboricua.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
   <script>
