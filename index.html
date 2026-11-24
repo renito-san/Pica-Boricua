@@ -1185,6 +1185,16 @@
         background: var(--red); color: #fff; border: 2px solid var(--red-dark);
         border-radius: 10px; padding: 11px; min-height: 46px; font-size: 1rem; margin-top: 6px;
       }
+      /* ---------- Pop-up de bienvenida (solo la primera visita) ---------- */
+      .modal-veil.welcome-veil { z-index: 90; }
+      .modal.welcome { position: relative; text-align: center; padding: 24px 20px 20px; }
+      .modal.welcome h2 { font-size: 2rem; line-height: 1.1; margin: 2px 36px 10px; }
+      .welcome-x { position: absolute; top: 10px; right: 10px; font-size: .95rem; }
+      .welcome-note {
+        font-weight: 900; color: var(--gold-soft);
+        background: rgba(255,224,138,.13); border: 1.5px solid var(--gold);
+        border-radius: 10px; padding: 10px 12px; margin: 12px 0 4px;
+      }
       /* ---------- Fase A: photo finish, repetición, ficha voladora, cobro ---------- */
       .pf-card {
         display: none;
@@ -1662,6 +1672,16 @@
           <a class="sell-btn" href="https://docs.google.com/forms/d/e/1FAIpQLSeQ-nUeqpE_Me72aFZdmYixqnfXxnhW7mxY80_sUw1xUPKVTA/viewform" target="_blank" rel="noopener">Anúnciate en Pica Boricua</a>
         </div>
         <button class="close" id="btnSponsorClose" type="button">Cerrar</button>
+      </div>
+    </div>
+
+    <div class="modal-veil welcome-veil" id="welcomeModal" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle">
+      <div class="modal welcome">
+        <button class="icon-btn welcome-x" id="btnWelcomeClose" type="button" aria-label="Cerrar">✕</button>
+        <h2 id="welcomeTitle">¡Bienvenido a Pica Boricua!</h2>
+        <p>Estás en el juego de las picas, la tradición de las fiestas patronales de Puerto Rico. Escoge tu caballo, apuesta tus fichas y que quede pegado a la meta sin pasarse.</p>
+        <p class="welcome-note">Es un juego de entretenimiento: el dinero es ficticio, no se gana ni se pierde dinero real.</p>
+        <button class="close" id="btnWelcomePlay" type="button">¡A jugar!</button>
       </div>
     </div>
 
@@ -4209,6 +4229,26 @@
       $("btnHelp").addEventListener("click", function () { $("helpModal").classList.add("open"); });
       $("btnHelpClose").addEventListener("click", function () { $("helpModal").classList.remove("open"); });
       $("helpModal").addEventListener("click", function (e) { if (e.target === this) this.classList.remove("open"); });
+
+      /* Pop-up de bienvenida: solo la primera visita. Al cerrarse por
+         cualquier vía (X, «¡A jugar!» o el fondo) se marca como visto
+         en la clave picaspr_bienvenida_v1 y no vuelve a salir. Sin
+         sonido: no llama a PicaSnd en ningún momento. */
+      (function () {
+        var WELCOME_KEY = "picaspr_bienvenida_v1";
+        var seen = false;
+        try { seen = localStorage.getItem(WELCOME_KEY) === "1"; } catch (e) { /* navegador privado: se muestra */ }
+        if (seen) return;
+        var veil = $("welcomeModal");
+        function closeWelcome() {
+          veil.classList.remove("open");
+          try { localStorage.setItem(WELCOME_KEY, "1"); } catch (e) { /* navegador privado */ }
+        }
+        $("btnWelcomeClose").addEventListener("click", closeWelcome);
+        $("btnWelcomePlay").addEventListener("click", closeWelcome);
+        veil.addEventListener("click", function (e) { if (e.target === this) closeWelcome(); });
+        veil.classList.add("open");
+      })();
 
       $("btnReset").addEventListener("click", function () { $("confirmReset").classList.add("open"); });
       $("btnResetNo").addEventListener("click", function () { $("confirmReset").classList.remove("open"); });
