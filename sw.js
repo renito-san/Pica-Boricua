@@ -1,12 +1,22 @@
 // Pica Boricua — service worker (cache-first, caché versionada)
-const CACHE_NAME = "pica-boricua-v14";
+const CACHE_NAME = "pica-boricua-v15";
 const PRECACHE_URLS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./icon-192.png",
   "./icon-512.png",
-  "./apple-touch-icon.png"
+  "./apple-touch-icon.png",
+  // v15: el logo y los sonidos salieron del HTML incrustado en base64
+  // a archivos del repo; se precargan para que el juego offline los
+  // tenga desde la primera instalación.
+  "./logo.webp",
+  "./sonidos/manigueta.wav",
+  "./sonidos/tac.wav",
+  "./sonidos/moneda.wav",
+  "./sonidos/toc.wav",
+  "./sonidos/victoria.wav",
+  "./sonidos/derrota.wav"
 ];
 
 self.addEventListener("install", (event) => {
