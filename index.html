@@ -87,7 +87,7 @@
          nada queda cortado ni solapado, y el relleno inferior de .wrap
          deja aire tras el último contenido. */
       .game {
-        display: flex; flex-direction: column; gap: 1px;
+        display: flex; flex-direction: column; gap: 0;
         min-height: calc(100dvh - 12px);
       }
 
@@ -98,7 +98,7 @@
       .topbar {
         flex: 0 0 auto;
         display: flex; align-items: center; gap: 8px;
-        height: 34px;
+        height: 32px;
       }
       .saldo-pill {
         flex: 1 1 auto; min-width: 0;
@@ -136,7 +136,7 @@
       .saldo-bar i { display: block; height: 100%; width: 5%; background: var(--gold); transition: width .6s ease; }
       .icon-btns { display: flex; gap: 6px; flex: 0 0 auto; }
       .icon-btn {
-        width: 33px; height: 33px; border-radius: 50%;
+        width: 31px; height: 31px; border-radius: 50%;
         display: grid; place-items: center;
         font-family: inherit; font-size: 1.05rem; font-weight: 900; line-height: 1;
         background: var(--panel); color: var(--ink-soft);
@@ -175,7 +175,7 @@
         background: linear-gradient(180deg, #b02a20, #8c1a14 78%);
         border: 1.5px solid #6e130d;
         border-radius: 10px;
-        padding: 4px 10px;
+        padding: 3px 10px;
         box-shadow: inset 0 1px 0 rgba(255,240,200,.25), inset 0 -8px 14px rgba(0,0,0,.18);
         overflow: hidden;
       }
@@ -222,7 +222,7 @@
         background: linear-gradient(180deg, #ffd94d, var(--gold) 72%);
         color: #3a2404;
         border: 1.5px solid #a86e00; border-radius: 999px;
-        padding: 3px 10px 4px;
+        padding: 2px 10px 3px;
         font-size: .6rem; font-weight: 900; letter-spacing: .07em;
         white-space: nowrap;
         box-shadow: 0 1px 3px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.55);
@@ -242,7 +242,7 @@
          no crece ni gana scroll. */
       .panel-marks {
         flex: 0 0 auto; margin-left: auto;
-        display: flex; flex-direction: column; align-items: flex-end; gap: 3px;
+        display: flex; flex-direction: column; align-items: flex-end; gap: 2px;
       }
       .panel-marks .record-pill { margin-left: 0; }
       /* PASTILLA DE NIVEL (puntos de caseta, permanentes): medallón
@@ -254,7 +254,7 @@
         display: inline-flex; align-items: center; gap: 5px;
         background: rgba(43,10,4,.38); color: #fdf6e3;
         border: 1.5px solid rgba(216,201,163,.75); border-radius: 999px;
-        padding: 2px 8px 3px;
+        padding: 1px 8px 2px;
         font-size: .56rem; font-weight: 900; letter-spacing: .06em;
         white-space: nowrap;
         box-shadow: 0 1px 3px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.18);
@@ -434,7 +434,7 @@
         border: 1.5px solid #c9a86a;
         border-top: 3px solid #17603a;
         border-radius: 8px;
-        padding: 4px 10px;
+        padding: 3px 10px;
         box-shadow: 0 2px 5px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.7);
       }
       .banner-medal {
@@ -723,9 +723,9 @@
       .piquero {
         flex: 0 0 auto;
         background: #241708; color: #fdf6e3;
-        border-radius: 8px; padding: 1px 10px;
+        border-radius: 8px; padding: 0 10px;
         display: flex; gap: 7px; align-items: baseline;
-        font-size: .84rem; line-height: 1.3;
+        font-size: .84rem; line-height: 1.2;
       }
       .piquero .who {
         font-family: "Bangers", sans-serif; letter-spacing: .06em;
@@ -742,8 +742,8 @@
       .bet-card {
         flex: 0 0 auto; position: relative;
         background: var(--panel); border: 1.5px solid var(--line);
-        border-radius: 12px; padding: 13px 8px 4px;
-        display: flex; flex-direction: column; gap: 2px;
+        border-radius: 12px; padding: 13px 8px 3px;
+        display: flex; flex-direction: column; gap: 1px;
         box-shadow: 0 3px 12px rgba(0,0,0,.25);
       }
       /* FRENTE — el lado del jugador: sobre el borde superior del
@@ -1291,6 +1291,79 @@
       }
       @media (prefers-color-scheme: dark) { .btn-replay { color: var(--gold-soft); border-color: var(--gold); } }
       .btn-replay:active { transform: scale(.98); }
+      /* ===== PAQUETE DE RETENCIÓN (las 6 mejoras) =====
+         LÍNEA DE META + RACHA (mejoras 3 y 4): una sola línea fina
+         entre la barra de saldo y el panel de la caseta — la meta más
+         cercana («Te faltan X pts para …») a la izquierda y la racha
+         viva a la derecha, con la barra de progreso como pelo dorado
+         al borde inferior, el mismo truco de la barra del saldo. Su
+         alto (~15px) se financia con recortes fuera de la pista
+         (hueco de .game a 0, barra superior 34→32, rellenos del
+         panel y del banner −2px, pastillas −2px): la pista no se
+         achica y la pantalla sigue sin scroll a 390 y a 360. */
+      .goal-line {
+        flex: 0 0 auto; position: relative; overflow: hidden;
+        display: flex; align-items: center; gap: 8px;
+        height: 15px; padding: 0 3px 2px;
+        font-size: .63rem; font-weight: 800; line-height: 1.15;
+        color: var(--ink-soft); white-space: nowrap;
+      }
+      .goal-line .goal-txt { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+      .goal-line .goal-txt b { color: var(--green-dark); }
+      @media (prefers-color-scheme: dark) { .goal-line .goal-txt b { color: var(--gold-soft); } }
+      .goal-line .streak-txt { flex: 0 0 auto; color: var(--gold-soft); font-weight: 900; }
+      .goal-line .streak-txt[hidden] { display: none; }
+      .goal-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(0,0,0,.28); }
+      .goal-bar i { display: block; height: 100%; width: 0%; background: var(--gold); transition: width .6s ease; }
+      /* BOTÓN OTRA VEZ (mejora 1): prominente en el panel de
+         resultado, con el mismo rojo de ¡A CORRER!; apagado cuando
+         el saldo no cubre repetir la jugada. */
+      .btn-again {
+        font-family: "Bangers", sans-serif; letter-spacing: .06em; cursor: pointer; width: 100%;
+        background: var(--red); color: #fff; font-size: 1.12rem; line-height: 1.1;
+        border: 2px solid var(--red-dark); border-radius: 10px;
+        padding: 8px; min-height: 42px; margin-top: 8px;
+        box-shadow: 0 2px 6px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.25);
+      }
+      .btn-again:active:not(:disabled) { transform: translateY(1px); }
+      .btn-again:disabled { filter: grayscale(.6); opacity: .55; cursor: default; box-shadow: none; }
+      .again-note { margin: 4px 0 0 !important; font-size: .78rem !important; color: var(--ink-soft); }
+      /* BOTÓN ⏩ DEFINICIÓN (mejora 2): pequeño y discreto, pegado a
+         la esquina inferior derecha de la tarjeta de la pista; solo
+         existe durante el crucero (el JS lo muestra y lo esconde). */
+      .btn-skip {
+        position: absolute; right: 8px; bottom: 8px; z-index: 6;
+        font-family: inherit; font-size: .68rem; font-weight: 900; cursor: pointer;
+        color: var(--gold-soft); background: rgba(20,16,4,.72);
+        border: 1.5px solid rgba(255,224,138,.65); border-radius: 999px;
+        padding: 4px 10px 5px; line-height: 1.1;
+      }
+      .btn-skip[hidden] { display: none; }
+      .btn-skip:active { transform: scale(.96); }
+      /* CARRERA DE ORO (mejora 6): cinta dorada sobre la parte alta
+         de la pista, visible desde el arranque hasta la liquidación. */
+      .gold-banner {
+        position: absolute; left: 50%; top: 8px; transform: translateX(-50%); z-index: 6;
+        font-family: "Bangers", sans-serif; letter-spacing: .06em; white-space: nowrap;
+        font-size: .95rem; line-height: 1.15; color: #4a2c00;
+        background: linear-gradient(180deg, #ffe98a, var(--gold) 75%);
+        border: 1.5px solid #a86e00; border-radius: 999px;
+        padding: 4px 14px 5px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.45), 0 0 14px rgba(255,210,63,.55), inset 0 1px 0 rgba(255,255,255,.6);
+      }
+      .gold-banner[hidden] { display: none; }
+      /* MISIONES DE HOY (mejora 5): lista compacta en su pliegue,
+         con el mismo ritmo visual que las metas de la Copa. */
+      .misiones-list { list-style: none; margin: 0; padding: 0; }
+      .misiones-list li {
+        display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+        font-size: .82rem; font-weight: 700; color: var(--ink-soft);
+        padding: 4px 0; border-top: 1px dashed var(--line);
+      }
+      .misiones-list li:first-child { border-top: none; }
+      .misiones-list .m-name { font-weight: 900; color: var(--ink); }
+      .misiones-list li.done .m-name { color: #b8860b; }
+      .misiones-list .m-state { white-space: nowrap; }
       .prize-line { font-size: 1rem !important; }
       .prize-count { color: var(--green-dark); font-size: 1.35rem; font-weight: 900; }
       @media (prefers-color-scheme: dark) { .prize-count { color: #4ade80; } }
@@ -1380,7 +1453,7 @@
         .tab { min-height: 34px; }
       }
     </style>
-    <link rel="manifest" href="manifest.webmanifest" />
+      <link rel="manifest" href="manifest.webmanifest" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <meta name="theme-color" content="#1c6b3a" />
@@ -1403,6 +1476,12 @@
             <button class="icon-btn" id="btnSound" type="button" aria-label="Sonido: encendido" aria-pressed="true" title="Sonido">♪</button>
           </div>
         </header>
+
+        <div class="goal-line" aria-live="polite">
+          <span class="goal-txt" id="goalTxt">Te faltan 100 pts para Apostador</span>
+          <span class="streak-txt" id="streakTxt" hidden></span>
+          <div class="goal-bar" aria-hidden="true"><i id="goalFill"></i></div>
+        </div>
 
         <div class="confirm" id="confirmReset" role="alertdialog" aria-labelledby="confirmTxt">
           <p id="confirmTxt">¿Empezar de nuevo? Tu saldo vuelve a $50.00 y se borra el historial. Tu récord, tu total ganado, tu nivel y tus copas se quedan: son marcas de por vida de este teléfono.</p>
@@ -1492,6 +1571,8 @@
               <span class="wm-num">¡EL <span id="wmNum">–</span>!</span>
             </div>
           </div>
+          <div class="gold-banner" id="goldBanner" hidden>★ ¡CARRERA DE ORO! · PUNTOS DOBLES ★</div>
+          <button class="btn-skip" id="btnSkip" type="button" hidden>⏩ Definición</button>
         </section>
 
         <div class="piquero" id="piqueroBox" aria-live="polite">
@@ -1600,6 +1681,14 @@
           </div>
         </details>
 
+        <details class="fold" id="misionesFold">
+          <summary>Misiones de hoy</summary>
+          <div class="fold-body">
+            <p class="stats-line">Tres retos cortos que se renuevan solos cada día (hora de Puerto Rico). Al completarlos, el bono suma a tus puntos de caseta — a tu nivel y a la Copa de la semana — y también se envía al Torneo en línea. El dinero de tu saldo no se toca.</p>
+            <ul class="misiones-list" id="misionesList"></ul>
+          </div>
+        </details>
+
         <div class="install-bar" id="installBar" hidden role="region" aria-label="Instala Pica Boricua">
           <p class="install-txt" id="installTxt">Añade Pica Boricua a tu pantalla de inicio para jugar la Copa cada semana</p>
           <button class="install-btn" id="btnInstall" type="button" hidden>Instalar</button>
@@ -1641,6 +1730,10 @@
         <p class="faq-item"><strong class="faq-q">¿Por qué no puedo cambiar mi nombre de la Copa?</strong><span class="faq-a">Queda fijo durante la semana al sumar tus primeros puntos, para que nadie se haga pasar por otro. El lunes puedes cambiarlo.</span></p>
         <p class="faq-item"><strong class="faq-q">¿Cómo controlo el sonido?</strong><span class="faq-a">El juego tiene sonidos cortos estilo tragamonedas. Se encienden y se apagan con el botón ♪ de arriba, y tu preferencia queda guardada. Si no escuchas nada, revisa también que el teléfono no esté en silencio.</span></p>
         <p class="faq-item"><strong class="faq-q">¿Cómo instalo el juego?</strong><span class="faq-a">iPhone: Safari → Compartir → «Añadir a pantalla de inicio». Android: Chrome → menú ⋮ → «Instalar app».</span></p>
+        <p class="faq-item"><strong class="faq-q">¿Qué hace el botón OTRA VEZ?</strong><span class="faq-a">Al liquidarse una carrera, OTRA VEZ vuelve a poner exactamente la misma jugada — los mismos números, el mismo tipo y el mismo monto — y arranca la próxima carrera de una vez, sin armar la apuesta otra vez. Si tu saldo no cubre el monto, el botón aparece apagado.</span></p>
+        <p class="faq-item"><strong class="faq-q">¿Para qué es el botón ⏩ Definición?</strong><span class="faq-a">Durante el crucero de la carrera puedes tocarlo para saltar directo a la definición, que es donde se decide. Saltar solo adelanta la animación: cada caballito ya tiene su final sorteado desde el arranque, así que el ganador y la liquidación son exactamente los mismos con salto o sin él.</span></p>
+        <p class="faq-item"><strong class="faq-q">¿Qué es la Carrera de Oro?</strong><span class="faq-a">Al azar, 1 de cada 8 carreras se anuncia desde el arranque como Carrera de Oro: los puntos de esa carrera valen doble, con un tope de 56 puntos por carrera (el mismo del Torneo en línea). Los pagos en dinero no cambian — solo los puntos.</span></p>
+        <p class="faq-item"><strong class="faq-q">¿Qué son las Misiones de hoy?</strong><span class="faq-a">Tres retos cortos que se renuevan cada día: jugar 10 carreras (+15 pts), ganar 3 carreras (+20 pts) y acertar un número (+25 pts). Al completarlas, el bono suma a tu nivel y a la Copa de la semana, y se envía al Torneo en línea como los puntos de cada carrera.</span></p>
         <p class="help-report"><a href="https://docs.google.com/forms/d/e/1FAIpQLSfJlAQjJcBh7oPLrFhdIkHHgHCddFWGzmeoYVLC3lZGxseZhw/viewform" target="_blank" rel="noopener">¿Un problema o una sugerencia? Cuéntanos aquí</a></p>
         <button class="close" id="btnHelpClose" type="button">Entendido — ¡a jugar!</button>
       </div>
@@ -1711,7 +1804,6 @@
       var COUNT_KEY = "picaspr_contadores_v1";
       var PEND_KEY  = "picaspr_pendiente_v1"; // apuesta descontada con carrera sin resolver
       var INSTALL_KEY = "picaspr_instalacion_v1"; // aviso de instalación descartado / app ya instalada
-      var INSTALLED_COUNTED_KEY = "picaspr_instalada_contada_v1"; // primera apertura como app instalada ya contada en GoatCounter
       var GAME_URL = "https://picaboricua.com/";
       // Contadores escondidos para el reporte del auspiciador (solo este teléfono)
       var counters = { visits: 0, sponsor: 0, shares: 0, ads: {}, month: null };
@@ -2428,6 +2520,7 @@
         renderRecord();
         renderLevel();
         renderCopa();
+        renderGoal();
       }
 
       /* ================= Niveles: puntos de caseta =================
@@ -2556,6 +2649,126 @@
         if (cl) cl.textContent = "Copas: " + state.stats.copaFin + (state.stats.copaFin === 1 ? " vez" : " veces") +
           " Finalista · " + state.stats.copaCam + (state.stats.copaCam === 1 ? " vez" : " veces") + " Campeón";
       }
+      /* ================= META VISIBLE + RACHA VISIBLE =================
+         La línea fina sobre el panel de la caseta enseña siempre la
+         meta MÁS CERCANA del jugador entre el próximo nivel
+         (100/300/750) y las metas de la Copa de esta semana
+         (150 Finalista / 300 Campeón), con su barra de progreso, y a
+         la derecha la racha viva de victorias: desde la 2.ª seguida
+         avisa que la próxima victoria trae el bono de racha que ya
+         paga la tabla de puntos (+10 desde la 3.ª). Solo lectura:
+         no suma ni mueve ningún contador. */
+      function renderGoal() {
+        var gt = $("goalTxt"), gf = $("goalFill"), st = $("streakTxt");
+        if (gt) {
+          copaBucket();
+          var pts = state.stats.points, lv = levelOf(pts), cp = state.stats.copaPts;
+          var cands = [];
+          if (lv.next) cands.push({ falta: lv.next.min - pts, txt: "para " + lv.next.name, frac: lv.prog });
+          if (cp < COPA_GOAL_FIN) cands.push({ falta: COPA_GOAL_FIN - cp, txt: "para Finalista", frac: cp / COPA_GOAL_FIN });
+          else if (cp < COPA_GOAL_CAM) cands.push({ falta: COPA_GOAL_CAM - cp, txt: "para Campeón", frac: 0.5 + (cp - COPA_GOAL_FIN) / (COPA_GOAL_CAM - COPA_GOAL_FIN) / 2 });
+          if (!cands.length) {
+            gt.textContent = "¡Todas tus metas están alcanzadas!";
+            if (gf) gf.style.width = "100%";
+          } else {
+            cands.sort(function (a, b) { return a.falta - b.falta; });
+            gt.innerHTML = "Te faltan <b>" + cands[0].falta + " pts</b> " + cands[0].txt;
+            if (gf) gf.style.width = Math.round(clamp(cands[0].frac, 0, 1) * 100) + "%";
+          }
+        }
+        if (st) {
+          var s = state.stats.streak;
+          if (s >= 2) { st.hidden = false; st.textContent = "🔥 Racha: " + s + " · bono a la próxima"; }
+          else if (s === 1) { st.hidden = false; st.textContent = "🔥 Racha: 1"; }
+          else { st.hidden = true; st.textContent = ""; }
+        }
+      }
+
+      /* ================= MISIONES DEL DÍA =================
+         Tres misiones cortas por día, en su PROPIA clave
+         (picaspr_misiones_v1): el día se calcula en hora de Puerto
+         Rico (America/Puerto_Rico) y al cambiar el día el progreso
+         se renueva solo, sin tocar ninguna otra clave. Los bonos son
+         PUNTOS de caseta: suman al nivel permanente y a la Copa de
+         la semana, y viajan al Torneo en línea por el mismo
+         mecanismo de envío/cola (torneoOnRace). El saldo no se toca. */
+      var MISIONES_KEY = "picaspr_misiones_v1";
+      var MISS_DEFS = [
+        { id: "juega",  label: "Juega 10 carreras hoy", goal: 10, bonus: 15 },
+        { id: "gana",   label: "Gana 3 carreras hoy",   goal: 3,  bonus: 20 },
+        { id: "numero", label: "Acierta un número hoy", goal: 1, bonus: 25 }
+      ];
+      var misiones = { day: "", prog: { juega: 0, gana: 0, numero: 0 }, done: {} };
+      function prDayKey() {
+        try {
+          return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Puerto_Rico", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+        } catch (e) {
+          var d = new Date();
+          return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+        }
+      }
+      function misionesSave() {
+        try { localStorage.setItem(MISIONES_KEY, JSON.stringify(misiones)); } catch (e) { /* navegador privado */ }
+      }
+      function misionesBucket() {
+        var k = prDayKey();
+        if (misiones.day !== k) {
+          misiones = { day: k, prog: { juega: 0, gana: 0, numero: 0 }, done: {} };
+          misionesSave();
+        }
+      }
+      function misionesLoad() {
+        try {
+          var m = JSON.parse(localStorage.getItem(MISIONES_KEY) || "null");
+          if (m && typeof m === "object") {
+            misiones.day = typeof m.day === "string" ? m.day : "";
+            if (m.prog && typeof m.prog === "object") {
+              misiones.prog.juega = m.prog.juega || 0;
+              misiones.prog.gana = m.prog.gana || 0;
+              misiones.prog.numero = m.prog.numero || 0;
+            }
+            if (m.done && typeof m.done === "object") misiones.done = m.done;
+          }
+        } catch (e) { /* sin guardado: las misiones nacen hoy */ }
+        misionesBucket(); // si el día guardado ya pasó, se renuevan aquí
+      }
+      /* Registra la carrera recién liquidada y devuelve las
+         misiones que se completan CON ella (sus bonos ya sumados a
+         puntos y Copa por el llamador vía el retorno). */
+      function misionesOnRace(won, numeroHit) {
+        var doneNow = [];
+        try {
+          misionesBucket();
+          var p = misiones.prog;
+          p.juega = Math.min(MISS_DEFS[0].goal, p.juega + 1);
+          if (won) p.gana = Math.min(MISS_DEFS[1].goal, p.gana + 1);
+          if (numeroHit) p.numero = 1;
+          MISS_DEFS.forEach(function (d) {
+            if (!misiones.done[d.id] && (p[d.id] || 0) >= d.goal) {
+              misiones.done[d.id] = 1;
+              state.stats.points += d.bonus;
+              state.stats.copaPts += d.bonus;
+              doneNow.push(d);
+            }
+          });
+          misionesSave();
+        } catch (e) { /* las misiones nunca rompen la liquidación */ }
+        return doneNow;
+      }
+      function renderMissions() {
+        var ul = $("misionesList");
+        if (!ul) return;
+        misionesBucket();
+        var html = "";
+        MISS_DEFS.forEach(function (d) {
+          var p = Math.min(misiones.prog[d.id] || 0, d.goal);
+          var done = !!misiones.done[d.id];
+          html += '<li class="' + (done ? "done" : "") + '"><span class="m-name">' + d.label + '</span>' +
+            '<span class="m-state">' + (done ? "✓ +" + d.bonus + " pts" : p + "/" + d.goal + " · +" + d.bonus + " pts") + "</span></li>";
+        });
+        ul.innerHTML = html;
+      }
+
       /* ================= TORNEO EN LÍNEA (Fase 2 · Supabase) =================
          La tabla real contra todos los jugadores, EN PARALELO a la Copa
          local contra metas (que no se toca): los mismos puntos de cada
@@ -3395,6 +3608,8 @@
       /* ================= Carrera ================= */
       var rafId = null;
       var starting = false, replaying = false, lastRace = null;
+      var lastBet = null;        // última jugada liquidada: la que repite el botón OTRA VEZ
+      var raceSkipAsked = false; // ⏩ Definición: el bucle de carrera adelanta su reloj al leerla
       var flySeq = 0; // generación del vuelo de ficha (anti carrera fantasma)
       function smooth01(f) { return f * f * (3 - 2 * f); }
 
@@ -3488,6 +3703,7 @@
         // estira suave (hasta ~0.42) en el último tramo de la definición:
         // esa es la cámara lenta del photo finish, sin tocar las posiciones
         var vClock = 0, lastNow = null;
+        var skipShown = false; raceSkipAsked = false;
         var saidStart = false, saidMid = false, saidDale = false;
         // Narración en vivo: qué ya cantó el piquero en esta carrera
         var saidLane = {}, saidPass = {}, saidNear = false;
@@ -3504,6 +3720,25 @@
           }
           vClock += dtR * (reduced ? 2.8 : tsF);
           var raceT = vClock;
+          // ⏩ Definición: si el jugador pidió el salto durante el
+          // crucero, el reloj virtual salta DIRECTO al inicio de la
+          // definición. Nada más cambia: las posiciones salen de los
+          // mismos finals sorteados al arranque (a rt = CRUISE la
+          // fórmula de definición arranca exactamente donde el
+          // crucero entregaba, porque cruiseOffset vuelve a cero) y
+          // ganador y liquidación ya los fijó judgeFinals.
+          if (raceSkipAsked && raceT >= GATHER && raceT < GATHER + CRUISE) {
+            vClock = GATHER + CRUISE;
+            raceT = vClock;
+            raceSkipAsked = false;
+          }
+          // El botón de salto solo existe durante el crucero
+          var wantSkip = raceT >= GATHER && raceT < GATHER + CRUISE;
+          if (wantSkip !== skipShown) {
+            skipShown = wantSkip;
+            var skb = $("btnSkip");
+            if (skb) skb.hidden = !wantSkip;
+          }
           // Cámara: completa en crucero; zoom suave a la meta al definir.
           // La híbrida viaja con ella: inclinada en crucero (de pie
           // frente a la mesa) y levantándose a plano total en cuanto
@@ -3601,6 +3836,11 @@
       function finishRace(bet, winner, passed, gaps) {
         state.racing = false;
         clearBetMarkers(); // al liquidar se recoge el dinero de la mesa
+        var gbF = $("goldBanner"); if (gbF) gbF.hidden = true; // la cinta de oro se recoge al liquidar
+        var skF = $("btnSkip"); if (skF) skF.hidden = true;
+        raceSkipAsked = false;
+        // La jugada recién liquidada es la que repite OTRA VEZ
+        lastBet = { type: bet.type, selection: bet.selection.slice(), desc: bet.desc, amount: bet.amount };
         // El cuadro congelado es el que dejó el bucle de carrera: horsePos
         // ya trae los finals que juzgó judgeFinals — dibujo y juicio son
         // el mismo estado, sin un segundo cálculo
@@ -3693,8 +3933,17 @@
           state.stats.streak = 0; // la racha se rompe al perder
         }
         if (newRecord) { pts += 15; ptsTags.push("récord"); }
+        /* CARRERA DE ORO: los puntos ya calculados se duplican, con
+           el tope de 56 por carrera — el mismo que respeta el envío
+           al Torneo, para que local y en línea queden consistentes.
+           El dinero (credit/delta de arriba) no se toca. */
+        if (bet.gold) { pts = Math.min(56, pts * 2); ptsTags.push("oro ×2"); }
         state.stats.points += pts;
         state.stats.copaPts += pts;
+        /* MISIONES DEL DÍA: el progreso de esta carrera y los bonos
+           de las misiones que se completen con ella (suman a los
+           mismos dos contadores, como puntos de caseta que son). */
+        var misDone = misionesOnRace(won, bet.type === "numero" && won);
         var levelUp = levelOf(state.stats.points).idx > prevLevelIdx;
         var copaGoalHit = 0;
         if (prevCopaPts < COPA_GOAL_CAM && state.stats.copaPts >= COPA_GOAL_CAM) copaGoalHit = COPA_GOAL_CAM;
@@ -3703,13 +3952,22 @@
         save();
         renderHistory();
         renderStats();
+        renderMissions();
         try { torneoOnRace(pts); } catch (e) { /* el torneo en línea jamás bloquea la liquidación */ }
+        // Los bonos de misión viajan al Torneo por el mismo mecanismo de envío/cola
+        misDone.forEach(function (md) { try { torneoOnRace(md.bonus); } catch (e) { /* el torneo nunca rompe la liquidación */ } });
         renderSponsorLine(); // refresca también la línea mensual (carreras del mes)
+        var misTxt = "";
+        if (misDone.length) {
+          var misBonus = 0;
+          misDone.forEach(function (md) { misBonus += md.bonus; });
+          misTxt = " ¡Misión cumplida: " + misDone.map(function (md) { return md.label.replace(" hoy", ""); }).join(" · ") + " (+" + misBonus + " pts)!";
+        }
         say((won ? "¡Págale el " + winner + "!" : "¡Salió el " + winner + "!") +
             (newRecord ? " ¡Nuevo récord de la caseta!" : "") +
             (levelUp ? " ¡Subiste a " + levelOf(state.stats.points).cur.name + "!" : "") +
             (copaGoalHit === COPA_GOAL_FIN ? " ¡Finalista de la Copa Supermercado El Ahorro!" : "") +
-            (copaGoalHit === COPA_GOAL_CAM ? " ¡Campeón de la Copa Supermercado El Ahorro!" : ""), won);
+            (copaGoalHit === COPA_GOAL_CAM ? " ¡Campeón de la Copa Supermercado El Ahorro!" : "") + misTxt, won);
         if (newRecord) pulseRecord();
         if (levelUp) pulseLevel();
 
@@ -3886,6 +4144,11 @@
           ? "Se pasaron de la línea y quedaron fuera: el " + passed.join(", el ") + "."
           : "Nadie se pasó de la línea en esta carrera.") + "</p>";
         if (lastRace) html += '<button class="btn-replay" id="btnReplay" type="button">↻ Repetición de la definición</button>';
+        if (lastBet) {
+          var canAgain = state.balance >= lastBet.amount;
+          html += '<button class="btn-again" id="btnAgain" type="button"' + (canAgain ? "" : " disabled") + '>OTRA VEZ · LA MISMA JUGADA (' + money(lastBet.amount) + ")</button>";
+          if (!canAgain) html += '<p class="again-note">Tu saldo no cubre repetir esa jugada (' + money(lastBet.amount) + ").</p>";
+        }
         $("resultTitle").textContent = "¡Págale el " + winner + "!";
         $("resultBody").innerHTML = html;
         $("resultPanel").classList.add("open");
@@ -3898,6 +4161,8 @@
         }
         var rb = $("btnReplay");
         if (rb) rb.addEventListener("click", replayDefinition);
+        var ab = $("btnAgain");
+        if (ab) ab.addEventListener("click", startBetAgain);
       }
       function capDesc(bet) {
         var t = TYPES[bet.type];
@@ -3955,12 +4220,30 @@
         amt = Math.round(amt * 100) / 100;
         if (amt > t.max) { hint(TYPES[state.type].label + " tiene límite de " + money(t.max) + " — como dice el rótulo de la caseta.", true); return; }
         if (amt > state.balance) { hint("Eso es más de lo que tienes. Tu saldo es " + money(state.balance) + ".", true); return; }
+        var betObj = { type: state.type, selection: state.selection.slice(), desc: state.selDesc, amount: amt };
+        launchBet(betObj);
+      });
+
+      /* Arranque de una apuesta ya validada — el MISMO camino para
+         ¡A CORRER! y para OTRA VEZ: descuenta el monto, deja la
+         apuesta pendiente por si la página recarga, vuela los
+         billetes con placeBets y corre con runRace, con sus sonidos
+         de siempre. Aquí se sortea la CARRERA DE ORO (1 de cada 8):
+         se anuncia ANTES de correr con su cinta dorada y el doblaje
+         se aplica a los PUNTOS al liquidar (tope 56); el dinero de
+         la carrera no se entera. */
+      function launchBet(betObj) {
+        var amt = betObj.amount;
         var prevBal = state.balance;
         state.balance = round2(state.balance - amt);
         setPending(amt); // si la página recarga a mitad de carrera, se reembolsa al arrancar
         save();
         animateBalance(prevBal, state.balance, 450); // el saldo baja contando, no de un salto
         vibrate(15);
+        betObj.gold = Math.random() < 0.125;
+        var gb = $("goldBanner");
+        if (gb) gb.hidden = !betObj.gold;
+        if (betObj.gold) say("¡Carrera de oro! ¡Los puntos valen doble!");
         // Los billetes vuelan a sus casillas y cada uno queda pinchado con
         // su dominó; recién entonces salen los caballitos.
         // Guardia de generación: si el jugador reinicia durante la secuencia,
@@ -3968,9 +4251,42 @@
         starting = true;
         hideMedallion(); // si quedaba el medallón de la repetición, la nueva carrera lo retira
         $("btnCorrer").disabled = true;
-        var betObj = { type: state.type, selection: state.selection.slice(), desc: state.selDesc, amount: amt };
         var myFly = ++flySeq;
         placeBets(amt, betObj.selection, function () { if (myFly !== flySeq) return; starting = false; runRace(betObj); });
+      }
+
+      /* OTRA VEZ: recoloca EXACTAMENTE la última jugada liquidada
+         (mismos caballos, mismo tipo y mismo monto) y la corre por
+         el flujo normal. La mesa refleja la jugada repetida — tipo,
+         selección y monto — antes de arrancar. */
+      function startBetAgain() {
+        if (!lastBet || state.racing || starting || replaying) return;
+        if (state.balance < lastBet.amount) return; // el botón ya viene apagado; doble candado
+        var b = { type: lastBet.type, selection: lastBet.selection.slice(), desc: lastBet.desc, amount: lastBet.amount };
+        state.type = b.type;
+        document.querySelectorAll(".tab").forEach(function (x) {
+          var on = x.dataset.type === b.type;
+          x.classList.toggle("active", on);
+          x.setAttribute("aria-selected", on ? "true" : "false");
+        });
+        state.selection = b.selection.slice();
+        state.selDesc = b.desc;
+        $("amountInput").value = b.amount;
+        refreshBoardSel();
+        updateJugada();
+        updateSummary();
+        syncAmountChips();
+        hint("");
+        launchBet(b);
+      }
+
+      /* ⏩ Definición: solo marca el pedido; el bucle de la carrera
+         lo lee en su próximo cuadro y adelanta SU reloj virtual al
+         inicio de la definición. Los finales ya están sorteados y
+         juzgados desde el arranque — el salto no toca ni una
+         posición final, ni el ganador, ni la liquidación. */
+      $("btnSkip").addEventListener("click", function () {
+        if (state.racing && !replaying) raceSkipAsked = true;
       });
 
       /* Loguitos de los negocios demo, SOLO para la hoja del
@@ -4166,30 +4482,6 @@
       function rememberInstallGone() {
         try { localStorage.setItem(INSTALL_KEY, "1"); } catch (e) { /* navegador privado */ }
       }
-      /* Medición de instalaciones (marketing): la primera vez que el
-         juego se abre como app instalada (standalone) se cuenta UNA
-         sola vez por dispositivo en GoatCounter. Es la única señal
-         posible en iPhone, donde no existe el evento appinstalled.
-         La marca se guarda aunque GoatCounter aún no haya cargado —
-         para no duplicar — y el envío reintenta unos segundos hasta
-         que el contador cargue. */
-      function countInstalledOpenOnce() {
-        if (!isStandalone()) return;
-        var already = false;
-        try { already = localStorage.getItem(INSTALLED_COUNTED_KEY) === "1"; } catch (e) { /* navegador privado */ }
-        if (already) return;
-        try { localStorage.setItem(INSTALLED_COUNTED_KEY, "1"); } catch (e) { /* navegador privado */ }
-        var sent = false, tries = 0;
-        (function attempt() {
-          if (sent) return;
-          try {
-            if (window.goatcounter && goatcounter.count) { goatcounter.count({ path: 'instalada-apertura', event: true }); sent = true; return; }
-          } catch (e) { /* GoatCounter no cargó: el juego sigue */ }
-          tries++;
-          if (tries < 20) setTimeout(attempt, 500);
-        })();
-      }
-      countInstalledOpenOnce();
       function isIOSDevice() {
         var ua = navigator.userAgent || "";
         return /iphone|ipad|ipod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -4217,11 +4509,12 @@
         updateInstallBar();
       });
       window.addEventListener("appinstalled", function () {
-        try { if (window.goatcounter && goatcounter.count) goatcounter.count({ path: 'instalar', event: true }); } catch (e) { /* GoatCounter no cargó: el juego sigue */ }
         deferredInstallPrompt = null;
         rememberInstallGone();
         var bar = $("installBar");
         if (bar) bar.hidden = true;
+        // Medición de instalaciones (v13): la instalación se cuenta una vez
+        try { if (window.goatcounter && goatcounter.count) goatcounter.count({ path: 'instalar', event: true }); } catch (e) { /* GoatCounter no cargó: el juego sigue */ }
       });
       $("btnInstallClose").addEventListener("click", function () {
         rememberInstallGone();
@@ -4312,6 +4605,9 @@
         clearPending(); // el reinicio perdona la apuesta en curso: mesa limpia
         $("pfCard").classList.remove("open");
         hideMedallion(); // ni medallón ni su temporizador quedan colgados tras el reinicio
+        var gbR = $("goldBanner"); if (gbR) gbR.hidden = true;
+        var skR = $("btnSkip"); if (skR) skR.hidden = true;
+        raceSkipAsked = false;
         if (camHomeId) { cancelAnimationFrame(camHomeId); camHomeId = null; }
         if (balAnimId) { cancelAnimationFrame(balAnimId); balAnimId = null; }
         cam.s = 1; cam.fx = 200; cam.fy = 150;
@@ -4415,8 +4711,33 @@
       renderBalance(false);
       renderHistory();
       renderStats();
+      misionesLoad();
+      renderMissions();
       updateJugada();
       updateInstallBar();
+      /* Medición de instalaciones (v13): la primera apertura en modo
+         app instalada (standalone) se cuenta UNA sola vez por
+         aparato, con su propia clave. El script de GoatCounter carga
+         async al final de la página: si aún no está, se reintenta
+         unos segundos; la marca solo se guarda cuando el evento
+         salió, y en modo navegador normal nunca se cuenta. */
+      (function countInstalledOpen() {
+        try {
+          if (!isStandalone()) return;
+          var COUNTED_KEY = "picaspr_instalada_contada_v1";
+          if (localStorage.getItem(COUNTED_KEY) === "1") return;
+          var tries = 0;
+          (function attempt() {
+            tries++;
+            if (window.goatcounter && goatcounter.count) {
+              goatcounter.count({ path: 'instalada-apertura', event: true });
+              try { localStorage.setItem(COUNTED_KEY, "1"); } catch (e) { /* navegador privado */ }
+              return;
+            }
+            if (tries < 12) setTimeout(attempt, 700);
+          })();
+        } catch (e) { /* la medición nunca rompe el arranque */ }
+      })();
       try { torneoInit(); } catch (e) { /* el torneo en línea es paralelo: si algo falla, el juego arranca igual */ }
     </script>
     <script data-goatcounter="https://picaboricua.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
