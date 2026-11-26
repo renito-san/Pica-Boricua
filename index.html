@@ -3896,6 +3896,7 @@
         if (won) {
           state.stats.wins++;
           state.stats.best = Math.max(state.stats.best, credited);
+          snd("victoria"); // v15.1: la cascada suena AL LIQUIDAR, junto a la vibración — simétrico con la derrota; antes vivía en presentResult() y llegaba 7,050 ms tarde (pfTimer 650 + pfAutoTimer 4,200 + medalTimer 2,200)
           vibrate([60, 40, 60, 40, 130]);
         } else {
           snd("derrota"); // golpe breve al liquidar sin ganar, una vez por carrera
@@ -4060,7 +4061,7 @@
         pendingPresent = null;
         camHome(); // la cámara vuelve suave a la vista completa
         showResult(p.winner, p.passed, p.gaps, p.won, p.bet, p.msg, p.credit, p.pts, p.ptsTags);
-        if (p.won) { snd("victoria"); confetti(); }
+        if (p.won) { confetti(); } // v15.1: solo el espectáculo visual — el sonido de victoria ya sonó a tiempo en finishRace, al liquidar
         // El cobro como evento: el saldo cuenta de su valor viejo al nuevo
         if (state.balance !== p.prevShown) animateBalance(p.prevShown, state.balance, p.won ? 950 : 600);
         else { var el = $("saldoVal"); el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); }
@@ -4759,7 +4760,26 @@ if ("serviceWorker" in navigator) {
 var F={manigueta:"sonidos/manigueta.wav",tac:"sonidos/tac.wav",moneda:"sonidos/moneda.wav",toc:"sonidos/toc.wav",victoria:"sonidos/victoria.wav",derrota:"sonidos/derrota.wav"};
 var KEY='picaspr_sonido_v1', on=true;
 try{ on = localStorage.getItem(KEY) !== 'off'; }catch(e){}
-var ctx=null, bufs={}, master=null;
+var ctx=null, bufs={}, master=null, loading={}, pend={};
+function startBuf(n){
+  try{ var s = ctx.createBufferSource(); s.buffer = bufs[n]; s.connect(master); s.start(); }catch(e){}
+}
+function load(k){
+  if(!ctx || bufs[k] || loading[k]) return;
+  loading[k] = true;
+  try{
+    fetch(F[k]).then(function(r){ return r.arrayBuffer(); }).then(function(ab){
+      ctx.decodeAudioData(ab, function(b){
+        bufs[k] = b; loading[k] = false;
+        // v15.1: si play() pidió este sonido mientras se descargaba/
+        // decodificaba, suena en cuanto el buffer queda listo — pero
+        // solo si la petición es reciente (≤2.5 s); una más vieja se
+        // descarta para que nada suene fuera de su momento.
+        if(pend[k]){ var t = pend[k]; delete pend[k]; if(Date.now() - t <= 2500) startBuf(k); }
+      }, function(){ loading[k] = false; });
+    }).catch(function(){ loading[k] = false; });
+  }catch(e){ loading[k] = false; }
+}
 function ensure(){
   var AC = window.AudioContext || window.webkitAudioContext;
   if(!AC) return;
@@ -4770,15 +4790,15 @@ function ensure(){
       // v15: los WAV ya no viajan incrustados en base64 dentro del HTML;
       // son archivos .wav del repo (sonidos/), byte a byte los mismos que
       // aprobó René, y el service worker los precarga para que suenen
-      // también sin conexión. La carga sigue siendo asíncrona, igual que
-      // lo era la decodificación del base64: play() no cambia.
-      Object.keys(F).forEach(function(k){
-        try{
-          fetch(F[k]).then(function(r){ return r.arrayBuffer(); }).then(function(ab){
-            ctx.decodeAudioData(ab, function(b){ bufs[k]=b; }, function(){});
-          }).catch(function(){});
-        }catch(e){}
-      });
+      // también sin conexión.
+      // v15.1: la descarga+decodificación de los 6 WAV se dispara AQUÍ,
+      // al inicializar la página (ensure() corre al final del bloque,
+      // sin esperar gesto ni al primer snd()): el fetch no necesita
+      // gesto del jugador, y el AudioContext puede nacer suspendido en
+      // iOS y reanudarse en el primer pointerdown — decodificar sí
+      // funciona con el contexto suspendido. Así, cuando la carrera
+      // pide manigueta/toc/victoria/derrota, el buffer ya está listo.
+      Object.keys(F).forEach(load);
     }catch(e){}
   }
   if(ctx && ctx.state === 'suspended'){ ctx.resume(); }
@@ -4786,8 +4806,13 @@ function ensure(){
 function play(n){
   if(!on) return;
   ensure();
-  if(!ctx || !bufs[n]) return;
-  try{ var s = ctx.createBufferSource(); s.buffer = bufs[n]; s.connect(master); s.start(); }catch(e){}
+  if(!ctx) return;
+  if(bufs[n]){ startBuf(n); return; }
+  // v15.1: antes, si el buffer aún no estaba listo el sonido se PERDÍA
+  // en silencio. Ahora la petición queda pendiente y load() la suena
+  // al terminar de decodificar (ventana de 2.5 s, ver load()).
+  pend[n] = Date.now();
+  load(n);
 }
 document.addEventListener('pointerdown', function(){ if(on) ensure(); });
 ensure();
