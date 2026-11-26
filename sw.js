@@ -1,5 +1,5 @@
 // Pica Boricua — service worker (cache-first, caché versionada)
-const CACHE_NAME = "pica-boricua-v16"; // v15.1: victoria suena al liquidar + precarga de sonidos sin pérdida
+const CACHE_NAME = "pica-boricua-v17"; // v15.1: victoria suena al liquidar + precarga de sonidos sin pérdida
 const PRECACHE_URLS = [
   "./",
   "./index.html",
